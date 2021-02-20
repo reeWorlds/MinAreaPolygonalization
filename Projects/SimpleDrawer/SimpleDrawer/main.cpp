@@ -10,7 +10,9 @@ int main()
 {
 	Drawer drawer;
 
-	drawer.readPoints("../../../Data/Generated/0_circle.txt", sf::Color::Black);
+	string name = "5_circle.txt";
+	drawer.readPoints("../../../Data/Generated/" + name, sf::Color::Black);
+	drawer.readShape("../../../Data/ConvexHull/" + name, sf::Color::Blue);
 
 	drawer.show();
 

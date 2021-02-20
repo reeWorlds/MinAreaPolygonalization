@@ -1,6 +1,6 @@
 #include "Drawer.h"
 
-Drawer::Drawer() : windowX(1500), windowY(800), windowShift(50), pointR(3.0)
+Drawer::Drawer() : windowX(1600), windowY(900), windowShift(50), pointR(2.0)
 {
 	timer = 0;
 }
@@ -64,6 +64,13 @@ bool Drawer::switchEvent(sf::Event event, sf::RenderWindow& window)
 		{
 			return false;
 		}
+	}
+	if (event.type == sf::Event::Resized)
+	{
+		auto size = window.getSize();
+		double scale = max(double(size.x) / windowX, double(size.y) / windowY);
+
+		window.setSize(sf::Vector2u(windowX * scale, min(windowY * scale, 1080 - 80.0)));
 	}
 
 	return true;
