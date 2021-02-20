@@ -45,3 +45,5 @@
 *.user
 *.filters
 *.ipch
+*.iobj
+*.ipdb
