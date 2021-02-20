@@ -30,3 +30,18 @@
 *.exe
 *.out
 *.app
+
+# other
+*.opendb
+*.vcxproj
+*.log
+*.tlog
+*.pbd
+*.pdb
+*.idb
+*.ilk
+*.suo
+*.db
+*.user
+*.filters
+*.ipch
