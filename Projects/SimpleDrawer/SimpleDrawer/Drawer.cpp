@@ -169,13 +169,13 @@ void Drawer::rescaleCoordinates()
 	pointsD.clear();
 	for (auto p : points)
 	{
-		pointsD.push_back(Point((p.x - minX) * scale + windowShift, (p.y - minX) * scale + windowShift));
+		pointsD.push_back(Point((p.x - minX) * scale + windowShift, (p.y - minY) * scale + windowShift));
 	}
 	segmentsD.clear();
 	for (auto s: segments)
 	{
-		Point p1 = Point((s.p1.x - minX) * scale + windowShift, (s.p1.y - minX) * scale + windowShift);
-		Point p2 = Point((s.p2.x - minX) * scale + windowShift, (s.p2.y - minX) * scale + windowShift);
+		Point p1 = Point((s.p1.x - minX) * scale + windowShift, (s.p1.y - minY) * scale + windowShift);
+		Point p2 = Point((s.p2.x - minX) * scale + windowShift, (s.p2.y - minY) * scale + windowShift);
 
 		segmentsD.push_back(Segment(p1, p2));
 	}

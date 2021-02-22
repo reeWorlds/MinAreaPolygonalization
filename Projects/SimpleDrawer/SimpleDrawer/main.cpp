@@ -10,7 +10,7 @@ int main()
 {
 	Drawer drawer;
 
-	string name = "0_circle.txt";
+	string name = "9_circle.txt";
 	drawer.readPoints("../../../Data/Generated/" + name, sf::Color::Black);
 	drawer.readShape("../../../Data/MAPGreedy/" + name, sf::Color::Blue);
 

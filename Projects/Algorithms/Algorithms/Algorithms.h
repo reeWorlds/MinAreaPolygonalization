@@ -39,6 +39,8 @@ private:
 	static int pointsInsideTriangle(vector <vector <int> >& stripes, vector<Point>& points, int i, int j, int k);
 	static int pointsInsideTriangle(vector <Point>& points, int i, int j, int k);
 
+	static bool isSimplePolygon(vector <Point> points);
+
 public:
 
 	static vector <Point> convexHull(vector <Point> points);

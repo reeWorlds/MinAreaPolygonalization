@@ -30,15 +30,29 @@ void createGrid(string path, string fileName, string recordsName, int pointsN, i
 	allRecords.insert(fileName);
 	recordsIn.close();
 
+	set <double> usedX, usedY;
+
 	ofstream out(path + fileName);
 	for (int i = 0; i < pointsN; i++)
 	{
 		for (int j = 0; j < pointsM; j++)
 		{
-			double x = i * dist + (0.5 - getUniform()) * 2.0 * R;
-			double y = j * dist + (0.5 - getUniform()) * 2.0 * R;
+			while (true)
+			{
+				double x = i * dist + (0.5 - getUniform()) * 2.0 * R;
+				double y = j * dist + (0.5 - getUniform()) * 2.0 * R;
 
-			out << x << " " << y << "\n";
+				if (usedX.find(x) != usedX.end() || usedY.find(y) != usedY.end())
+				{
+					continue;
+				}
+
+				usedX.insert(x);
+				usedY.insert(y);
+
+				out << x << " " << y << "\n";
+				break;
+			}
 		}
 	}
 	out.close();
@@ -64,13 +78,28 @@ void createUniformSquare(string path, string fileName, string recordsName, doubl
 	allRecords.insert(fileName);
 	recordsIn.close();
 
+	set <double> usedX, usedY;
+
 	ofstream out(path + fileName);
 	for (int i = 0; i < pointsN; i++)
 	{
-		double x = getUniform() * maxX;
-		double y = getUniform() * maxY;
+		while (true)
+		{
+			double x = getUniform() * maxX;
+			double y = getUniform() * maxY;
 
-		out << x << " " << y << "\n";
+			if (usedX.find(x) != usedX.end() || usedY.find(y) != usedY.end())
+			{
+				continue;
+			}
+
+			usedX.insert(x);
+			usedY.insert(y);
+
+			out << x << " " << y << "\n";
+
+			break;
+		}
 	}
 	out.close();
 
@@ -95,15 +124,27 @@ void createUniformCircle(string path, string fileName, string recordsName, doubl
 	allRecords.insert(fileName);
 	recordsIn.close();
 
+	set <double> usedX, usedY;
+
 	ofstream out(path + fileName);
 	for (int i = 0; i < pointsN; i++)
 	{
 		double x = (getUniform() - 0.5) * 2.0 * R;
 		double y = (getUniform() - 0.5) * 2.0 * R;
 
+		if (usedX.find(x) != usedX.end() || usedY.find(y) != usedY.end())
+		{
+			i--;
+
+			continue;
+		}
+
 		if (x * x + y * y <= R * R)
 		{
 			out << x << " " << y << "\n";
+
+			usedX.insert(x);
+			usedY.insert(y);
 		}
 		else
 		{
@@ -159,11 +200,11 @@ void makeUniformCircle()
 
 int main()
 {
-	//makeGrids();
+	makeGrids();
 
-	//makeUniformSquare();
+	makeUniformSquare();
 
-	//makeUniformCircle();
+	makeUniformCircle();
 
 
 

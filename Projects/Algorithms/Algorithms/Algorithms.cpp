@@ -165,11 +165,11 @@ int Algorithms::pointsInsideTriangle(vector <vector <int> >& stripes, vector<Poi
 
 	if (midY >= points[j].y)
 	{
-		return stripes[i][k] - stripes[i][j] - stripes[j][k] - 1;
+		return stripes[i][k] - stripes[i][j] - stripes[j][k] - 1 + stripes[j][j];
 	}
 	else
 	{
-		return  stripes[i][j] + stripes[j][k] - stripes[i][k];
+		return  stripes[i][j] + stripes[j][k] - stripes[i][k] - stripes[j][j];
 	}
 }
 
@@ -191,11 +191,45 @@ int Algorithms::pointsInsideTriangle(vector <Point>& points, int i, int j, int k
 
 		if (abs(ts - s) < 1.0e-8)
 		{
-			res++;
+res++;
 		}
 	}
 
 	return res;
+}
+
+bool Algorithms::isSimplePolygon(vector <Point> points)
+{
+	set <Point> s;
+
+	for (auto it : points)
+	{
+		s.insert(it);
+	}
+
+	if (s.size() != points.size())
+	{
+		cout << "Points repeat------------------------\n";
+
+		return false;
+	}
+
+	points.push_back(points[0]);
+
+	for (int i = 0; i < points.size() - 1; i++)
+	{
+		for (int j = i + 2; j < points.size() - 2; j++)
+		{
+			if (intersect(Segment(points[i], points[i + 1]), Segment(points[j], points[j + 1])))
+			{
+				cout << "Segments intersect------------------------\n";
+
+				return false;
+			}
+		}
+	}
+
+	return true;
 }
 
 vector <Point> Algorithms::MAPGreedy(vector <Point> points)
@@ -243,7 +277,7 @@ vector <Point> Algorithms::MAPGreedy(vector <Point> points)
 		}
 	}
 
-	while (input.size() > 37)
+	while (input.size() > 0)
 	{
 		double bestArea = -1.0;
 		int bestPointI = 0;
@@ -254,7 +288,7 @@ vector <Point> Algorithms::MAPGreedy(vector <Point> points)
 		for (int i = 0; i < input.size(); i++)
 		{
 			int pointer = info[i].last;
-			while(pointer != -1)
+			while (pointer != -1)
 			{
 				double tArea = area(points[input[i].second], info[i].m[pointer].first.p1, info[i].m[pointer].first.p2);
 
@@ -270,8 +304,10 @@ vector <Point> Algorithms::MAPGreedy(vector <Point> points)
 			}
 		}
 
-		if (bestArea < 0)
+		if (bestArea < -0.5)
 		{
+			cout << "Unable to connect all poits\n";
+
 			break;
 		}
 
@@ -281,10 +317,19 @@ vector <Point> Algorithms::MAPGreedy(vector <Point> points)
 		// add new point to res
 		for (int i = 0; i < res.size() - 1; i++)
 		{
-			if ((res[i].first == p1 && res[i + 1].first == p3) || (res[i].first == p3 && res[i + 1].first == p1))
+			if (res[i].first == p1 && res[i + 1].first == p3)
 			{
 				p1i = res[i].second;
 				p3i = res[i + 1].second;
+				res.insert(res.begin() + i + 1, { bestPoint, p2i });
+
+				break;
+			}
+
+			if(res[i].first == p3 && res[i + 1].first == p1)
+			{
+				p3i = res[i].second;
+				p1i = res[i + 1].second;
 				res.insert(res.begin() + i + 1, { bestPoint, p2i });
 
 				break;
@@ -321,12 +366,37 @@ vector <Point> Algorithms::MAPGreedy(vector <Point> points)
 			{
 				int nxt = info[i].m[pointer].second.first;
 
-				if (intersect(Segment(input[i].first, info[i].m[pointer].first.p1), Segment(p1, p2)) ||
-					intersect(Segment(input[i].first, info[i].m[pointer].first.p2), Segment(p1, p2)) ||
-					intersect(Segment(input[i].first, info[i].m[pointer].first.p1), Segment(p3, p2)) ||
-					intersect(Segment(input[i].first, info[i].m[pointer].first.p2), Segment(p3, p2)) )
+				if (p1 != info[i].m[pointer].first.p1 && p2 != info[i].m[pointer].first.p1 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p1), Segment(p1, p2)))
 				{
 					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+				if (p1 != info[i].m[pointer].first.p2 && p2 != info[i].m[pointer].first.p2 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p2), Segment(p1, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+				if (p3 != info[i].m[pointer].first.p1 && p2 != info[i].m[pointer].first.p1 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p1), Segment(p3, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+				if (p3 != info[i].m[pointer].first.p2 && p2 != info[i].m[pointer].first.p2 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p2), Segment(p3, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
 				}
 
 				pointer = nxt;
@@ -359,7 +429,7 @@ vector <Point> Algorithms::MAPGreedy(vector <Point> points)
 
 			for (int j = 1; j < res.size(); j++)
 			{
-				if (np1 == res[j - 1].first && np1 == res[j].first)
+				if (np1 != res[j - 1].first && np1 != res[j].first)
 				{
 					if (intersect(Segment(res[j-1].first, res[j].first), Segment(np2, np1)) == true)
 					{
@@ -368,19 +438,7 @@ vector <Point> Algorithms::MAPGreedy(vector <Point> points)
 						break;
 					}
 				}
-			}
-			for (int j = 1; j < res.size(); j++)
-			{
-				if (np1 == res[j - 1].first && np1 == res[j].first)
-				{
-					if (intersect(Segment(res[j-1].first, res[j].first), Segment(np2, np1)) == true)
-					{
-						good = 0;
-
-						break;
-					}
-				}
-				if (np3 == res[j - 1].first && np3 == res[j].first)
+				if (np3 != res[j - 1].first && np3 != res[j].first)
 				{
 					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np3)) == true)
 					{
@@ -415,7 +473,7 @@ vector <Point> Algorithms::MAPGreedy(vector <Point> points)
 
 			for (int j = 1; j < res.size(); j++)
 			{
-				if (np1 == res[j - 1].first && np1 == res[j].first)
+				if (np1 != res[j - 1].first && np1 != res[j].first)
 				{
 					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np1)) == true)
 					{
@@ -424,19 +482,7 @@ vector <Point> Algorithms::MAPGreedy(vector <Point> points)
 						break;
 					}
 				}
-			}
-			for (int j = 1; j < res.size(); j++)
-			{
-				if (np1 == res[j - 1].first && np1 == res[j].first)
-				{
-					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np1)) == true)
-					{
-						good = 0;
-
-						break;
-					}
-				}
-				if (np3 == res[j - 1].first && np3 == res[j].first)
+				if (np3 != res[j - 1].first && np3 != res[j].first)
 				{
 					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np3)) == true)
 					{
@@ -454,12 +500,16 @@ vector <Point> Algorithms::MAPGreedy(vector <Point> points)
 		}
 	}
 
+	//cout << points.size() << " " << res.size() << "\n";
+
 	vector <Point> _res;
 	res.pop_back();
 	for (auto it : res)
 	{
 		_res.push_back(it.first);
 	}
+
+	isSimplePolygon(_res);
 
 	return _res;
 }
