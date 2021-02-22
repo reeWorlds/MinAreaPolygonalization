@@ -12,6 +12,7 @@ void Drawer::readPoints(string path, sf::Color color)
 	ifstream in(path);
 	while (in >> p.x >> p.y)
 	{
+		p.y *= -1.0;
 		points.push_back(p);
 		pointsColor.push_back(color);
 	}
@@ -26,6 +27,7 @@ void Drawer::readShape(string path, sf::Color color)
 	ifstream in(path);
 	while (in >> p.x >> p.y)
 	{
+		p.y *= -1.0;
 		readPoints.push_back(p);
 	}
 	in.close();
@@ -46,6 +48,9 @@ void Drawer::readSegments(string path, sf::Color color)
 	ifstream in(path);
 	while (in >> s.p1.x >> s.p1.y >> s.p2.x >> s.p2.y)
 	{
+		s.p1.y *= -1.0;
+		s.p2.y *= -1.0;
+
 		segments.push_back(s);
 		segmentsColor.push_back(color);
 	}

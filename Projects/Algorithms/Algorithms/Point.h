@@ -24,13 +24,13 @@ public:
 	Point(double x, double y);
 	Point(const Point& other);
 
-	bool operator ==(const Point& other);
-	bool operator !=(const Point& other);
+	bool operator ==(const Point& other) const;
+	bool operator !=(const Point& other) const;
 
-	bool operator <(const Point& other);
-	bool operator <=(const Point& other);
-	bool operator >(const Point& other);
-	bool operator >=(const Point& other);
+	bool operator <(const Point& other) const;
+	bool operator <=(const Point& other) const;
+	bool operator >(const Point& other) const;
+	bool operator >=(const Point& other) const;
 
 	double dist(const Point& other);
 	static double dist(const Point& a, const Point& b);

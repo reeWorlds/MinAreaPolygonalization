@@ -15,32 +15,32 @@ Point::Point(const Point& other) : x(other.x), y(other.y)
 
 }
 
-bool Point::operator ==(const Point& other)
+bool Point::operator ==(const Point& other) const
 {
 	return x == other.x && y == other.y;
 }
 
-bool Point::operator !=(const Point& other)
+bool Point::operator !=(const Point& other) const
 {
 	return !(this->operator==(other));
 }
 
-bool Point::operator <(const Point& other)
+bool Point::operator <(const Point& other) const
 {
 	return (x < other.x) || (x == other.x && y < other.y);
 }
 
-bool Point::operator <=(const Point& other)
+bool Point::operator <=(const Point& other) const
 {
 	return (x < other.x) || (x == other.x && y <= other.y);
 }
 
-bool Point::operator >(const Point& other)
+bool Point::operator >(const Point& other) const
 {
 	return !this->operator<=(other);
 }
 
-bool Point::operator >=(const Point& other)
+bool Point::operator >=(const Point& other) const
 {
 	return !this->operator<(other);
 }

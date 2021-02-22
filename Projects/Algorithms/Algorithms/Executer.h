@@ -8,6 +8,8 @@ public:
 
 	static void buildConvexHullForGeneratedData();
 
+	static void testMAPGreedy();
 
+	static void runMapGreedy();
 
 };

@@ -19,7 +19,11 @@ using namespace std;
 
 int main()
 {
-	Executer::buildConvexHullForGeneratedData();
+	//Executer::buildConvexHullForGeneratedData();
+
+	//Executer::testMAPGreedy();
+	
+	Executer::runMapGreedy();
 
 	return 0;
 }
