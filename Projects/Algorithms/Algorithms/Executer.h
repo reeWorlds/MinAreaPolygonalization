@@ -12,4 +12,6 @@ public:
 
 	static void runMapGreedy();
 
+	static void testTriangulation();
+
 };

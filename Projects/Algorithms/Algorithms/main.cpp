@@ -22,8 +22,9 @@ int main()
 	//Executer::buildConvexHullForGeneratedData();
 
 	//Executer::testMAPGreedy();
-	
-	Executer::runMapGreedy();
+	//Executer::runMapGreedy();
 
+	Executer::testTriangulation();
+	
 	return 0;
 }

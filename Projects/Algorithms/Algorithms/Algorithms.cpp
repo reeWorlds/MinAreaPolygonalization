@@ -43,46 +43,6 @@ double Algorithms::area(Point p1, Point p2, Point p3)
 	return 0.5 * abs((p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x));
 }
 
-vector <Point> Algorithms::convexHull(vector <Point> points)
-{
-	vector <Point> res;
-
-	Point leftMost = points[0];
-
-	for (auto& it : points)
-	{
-		if (it <= leftMost)
-		{
-			leftMost = it;
-		}
-	}
-
-	vector <pair<pdd, int> > inf; // {{angle, -dist}, number}
-
-	for (int i = 0; i < points.size(); i++)
-	{
-		if (points[i] != leftMost)
-		{
-			inf.push_back({ {angle(points[i] - leftMost), leftMost.dist2(points[i])}, i });
-		}
-	}
-
-	sort(inf.begin(), inf.end());
-
-	res.push_back(leftMost);
-	res.push_back(points[inf[0].second]);
-	for (int i = 1; i < inf.size(); i++)
-	{
-		while (angle(res.back() - res[res.size() - 2], points[inf[i].second] - res.back()) <= 0)
-		{
-			res.pop_back();
-		}
-		res.push_back(points[inf[i].second]);
-	}
-
-	return res;
-}
-
 vector <vector <int> > Algorithms::precalcPointsUnderStripe(vector <Point> points)
 {
 	vector <vector <int> > res(points.size(), vector<int>(points.size(), 0));
@@ -173,7 +133,7 @@ int Algorithms::pointsInsideTriangle(vector <vector <int> >& stripes, vector<Poi
 	}
 }
 
-int Algorithms::pointsInsideTriangle(vector <Point>& points, int i, int j, int k)
+int Algorithms::debug_pointsInsideTriangle(vector <Point>& points, int i, int j, int k)
 {
 	int res = 0;
 
@@ -198,7 +158,7 @@ res++;
 	return res;
 }
 
-bool Algorithms::isSimplePolygon(vector <Point> points)
+bool Algorithms::debug_isSimplePolygon(vector <Point> points)
 {
 	set <Point> s;
 
@@ -230,6 +190,147 @@ bool Algorithms::isSimplePolygon(vector <Point> points)
 	}
 
 	return true;
+}
+
+vector <vector <Point> > Algorithms::splitBySplitVertex(vector <Point> points)
+{
+	int n = points.size();
+	points.push_back(points[0]);
+	points.push_back(points[1]);
+
+	{
+		// check for the counterclockwise order
+		int maxYI = 1;
+		for (int i = 2; i <= n; i++)
+		{
+			if (points[i].y > points[maxYI].y)
+			{
+				maxYI = i;
+			}
+		}
+
+		if (angle(points[maxYI + 1] - points[maxYI]) < angle(points[maxYI - 1] - points[maxYI]))
+		{
+			cout << "counterclockwise\n";
+		}
+		else
+		{
+			reverse(points.begin(), points.end());
+			cout << "clockwise\n";
+		}
+	}
+
+	// find all bad nodes
+	vector <int> isGood(n + 2, 1);
+
+	for (int i = 1; i <= n; i++)
+	{
+		if (points[i - 1].y < points[i].y && points[i + 1].y < points[i].y)
+		{
+			if (angle(points[i - 1] - points[i]) < angle(points[i + 1] - points[i]))
+			{
+				isGood[i] = 0;
+
+				cout << "Point {" << points[i].x << "; " << points[i].y << "} is bad\n";
+			}
+		}
+	}
+
+	// sort points in scanline order
+	vector <pair<double, pair<Point, int> > > inf; // {y, {Point, index} }
+	for (int i = 1; i <= n; i++)
+	{
+		inf.push_back({ points[i].y , {points[i], i} });
+	}
+	sort(inf.begin(), inf.end());
+	reverse(inf.begin(), inf.end());
+
+	// add aditional edges to remove bad points
+	vector <Segment> edges;
+	for (int i = 1; i <= n; i++)
+	{
+		edges.push_back(Segment(points[i - 1], points[i]));
+	}
+	RBTreeTriangulation tree;
+
+	for (auto it : inf)
+	{
+		Point p = it.second.first;
+		int i = it.second.second;
+
+		if (isGood[i] == 1)
+		{
+			if ()
+			{
+
+			}
+			if ()
+			{
+
+			}
+
+			NodeTriangulation leftSegment = tree;
+
+			if ()
+			{
+
+			}
+			if ()
+			{
+
+			}
+		}
+		else
+		{
+			// todo if find segment
+		}
+
+	}
+
+
+
+
+	return vector <vector <Point> > ();
+}
+
+vector <Point> Algorithms::convexHull(vector <Point> points)
+{
+	vector <Point> res;
+
+	Point leftMost = points[0];
+
+	for (auto& it : points)
+	{
+		if (it <= leftMost)
+		{
+			leftMost = it;
+		}
+	}
+
+	vector <pair<pdd, int> > inf; // {{angle, -dist}, number}
+
+	for (int i = 0; i < points.size(); i++)
+	{
+		if (points[i] != leftMost)
+		{
+			inf.push_back({ {angle(points[i] - leftMost), leftMost.dist2(points[i])}, i });
+		}
+	}
+
+	sort(inf.begin(), inf.end());
+
+	res.push_back(leftMost);
+	res.push_back(points[inf[0].second]);
+	for (int i = 1; i < inf.size(); i++)
+	{
+		while (angle(res.back() - res[res.size() - 2], points[inf[i].second] - res.back()) <= 0)
+		{
+			res.pop_back();
+		}
+		res.push_back(points[inf[i].second]);
+	}
+
+	return res;
 }
 
 vector <Point> Algorithms::MAPGreedy(vector <Point> points)
@@ -500,8 +601,6 @@ vector <Point> Algorithms::MAPGreedy(vector <Point> points)
 		}
 	}
 
-	//cout << points.size() << " " << res.size() << "\n";
-
 	vector <Point> _res;
 	res.pop_back();
 	for (auto it : res)
@@ -509,7 +608,17 @@ vector <Point> Algorithms::MAPGreedy(vector <Point> points)
 		_res.push_back(it.first);
 	}
 
-	isSimplePolygon(_res);
-
 	return _res;
+}
+
+vector <tuple<Point, Point, Point> > Algorithms::triangulatePolygon(vector <Point> points)
+{
+	auto it = splitBySplitVertex(points);
+
+
+
+
+
+
+	return vector<tuple<Point, Point, Point> >();
 }

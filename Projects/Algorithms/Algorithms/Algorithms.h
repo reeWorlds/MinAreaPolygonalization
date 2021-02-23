@@ -18,6 +18,7 @@
 #include "Point.h"
 #include "Segment.h"
 #include "SegmentLinkedList.h"
+#include "DataStructures/RBTrees/RBTreeTriangulation.h"
 
 using namespace std;
 
@@ -37,9 +38,11 @@ private:
 
 	static vector <vector <int> > precalcPointsUnderStripe(vector <Point> points);
 	static int pointsInsideTriangle(vector <vector <int> >& stripes, vector<Point>& points, int i, int j, int k);
-	static int pointsInsideTriangle(vector <Point>& points, int i, int j, int k);
+	static int debug_pointsInsideTriangle(vector <Point>& points, int i, int j, int k);
 
-	static bool isSimplePolygon(vector <Point> points);
+	static bool debug_isSimplePolygon(vector <Point> points);
+
+	static vector <vector <Point> > splitBySplitVertex(vector <Point> points);
 
 public:
 
@@ -47,4 +50,5 @@ public:
 
 	static vector <Point> MAPGreedy(vector <Point> points);
 
+	static vector <tuple<Point, Point, Point> > triangulatePolygon(vector <Point> points);
 };

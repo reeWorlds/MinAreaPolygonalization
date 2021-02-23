@@ -132,3 +132,18 @@ void Executer::runMapGreedy()
 		outData.close();
 	}
 }
+
+void Executer::testTriangulation()
+{
+	vector <Point> v1, v2;
+
+	v1.push_back(Point(0.0, 3.0));
+	v1.push_back(Point(3.0, 0.0));
+	v1.push_back(Point(4.0, 2.0));
+	v1.push_back(Point(7.0, 1.0));
+	v1.push_back(Point(6.0, 5.0));
+	v1.push_back(Point(5.0, 4.0));
+	v1.push_back(Point(2.0, 6.0));
+
+	auto it = Algorithms::triangulatePolygon(v1);
+}
