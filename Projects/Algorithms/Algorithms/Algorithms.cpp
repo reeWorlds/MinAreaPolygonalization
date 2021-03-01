@@ -43,6 +43,20 @@ double Algorithms::area(Point p1, Point p2, Point p3)
 	return 0.5 * abs((p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x));
 }
 
+double Algorithms::area(vector <Point> points)
+{
+	points.push_back(points[0]);
+
+	double res = 0.0;
+
+	for (int i = 1; i < points.size(); i++)
+	{
+		res += (points[i].x - points[i - 1].x) * (points[i].y + points[i - 1].y) / 2.0;
+	}
+
+	return res;
+}
+
 vector <vector <int> > Algorithms::precalcPointsUnderStripe(vector <Point> points)
 {
 	vector <vector <int> > res(points.size(), vector<int>(points.size(), 0));
@@ -211,12 +225,11 @@ vector <vector <Point> > Algorithms::splitBySplitVertex(vector <Point> points)
 
 		if (angle(points[maxYI + 1] - points[maxYI]) < angle(points[maxYI - 1] - points[maxYI]))
 		{
-			cout << "counterclockwise\n";
+
 		}
 		else
 		{
 			reverse(points.begin(), points.end());
-			cout << "clockwise\n";
 		}
 	}
 
@@ -230,8 +243,6 @@ vector <vector <Point> > Algorithms::splitBySplitVertex(vector <Point> points)
 			if (angle(points[i - 1] - points[i]) < angle(points[i + 1] - points[i]))
 			{
 				isGood[i] = 0;
-
-				cout << "Point {" << points[i].x << "; " << points[i].y << "} is bad\n";
 			}
 		}
 	}
@@ -260,37 +271,153 @@ vector <vector <Point> > Algorithms::splitBySplitVertex(vector <Point> points)
 
 		if (isGood[i] == 1)
 		{
-			if ()
+			if (points[i - 1].y > points[i].y)
 			{
-
+				tree.deleteSegment(points[i - 1], points[i]);
 			}
-			if ()
+			if (points[i + 1].y > points[i].y)
 			{
-
+				tree.deleteSegment(points[i + 1], points[i]);
 			}
 
-			NodeTriangulation leftSegment = tree;
-
-			if ()
+			NodeTriangulation* leftSegment = tree.findFirstLeft(tree.root, p);
+			if (leftSegment != nullptr)
 			{
-
+				leftSegment->pLast = p;
 			}
-			if ()
-			{
 
+			if (points[i - 1].y < points[i].y)
+			{
+				tree.insert(points[i - 1], points[i]);
+			}
+			if (points[i + 1].y < points[i].y)
+			{
+				tree.insert(points[i + 1], points[i]);
 			}
 		}
 		else
 		{
-			// todo if find segment
-		}
+			NodeTriangulation* leftSegment = tree.findFirstLeft(tree.root, p);
+			edges.push_back({ p, leftSegment->pLast });
+			leftSegment->pLast = p;
 
+			if (points[i - 1].y < points[i].y)
+			{
+				tree.insert(points[i - 1], points[i]);
+			}
+			if (points[i + 1].y < points[i].y)
+			{
+				tree.insert(points[i + 1], points[i]);
+			}
+		}
 	}
 
+	vector <vector <Point> > faces;
 
+	map<Point, int> pointNumber; // number of a point
+	vector <Point> points2; // points
+	vector <set<pair<double, int> > > grA; // for each point: {angle with edge-neibor, index of neibor in gr}
+	vector <vector <pair<Point, pair<double, int> > > > gr; // for each point: {neibor point,{ angle, 0-1 if used} }
 
+	// numerate all points
+	int pointIndex = 0;
+	for (auto& p : points)
+	{
+		if (pointNumber.count(p) == 0)
+		{
+			points2.push_back(p);
+			pointNumber[p] = pointIndex;
 
-	return vector <vector <Point> > ();
+			pointIndex++;
+		}
+	}
+
+	// build grA and gr
+	gr.resize(pointIndex);
+	grA.resize(pointIndex);
+
+	for (auto s : edges)
+	{
+		int i1 = pointNumber[s.p1], i2 = pointNumber[s.p2];
+
+		{// s.p1
+			double angle = atan2(s.p2.y - s.p1.y, s.p2.x - s.p1.x);
+
+			grA[i1].insert({ angle, gr[i1].size() });
+			gr[i1].push_back({ s.p2, {angle, 0 } });
+		}
+
+		{// s.p2
+			double angle = atan2(s.p1.y - s.p2.y, s.p1.x - s.p2.x);
+
+			grA[i2].insert({ angle, gr[i2].size() });
+			gr[i2].push_back({ s.p1, {angle, 0 } });
+		}
+	}
+
+	// construct all faces
+	for (int i = 0; i < points2.size(); i++)
+	{
+		for (int j = 0; j < gr[i].size(); j++)
+		{
+			if (gr[i][j].second.second == 1)
+			{
+				continue;
+			}
+
+			vector <Point> face;
+			face.push_back(points2[i]);
+
+			Point p = gr[i][j].first;
+			double angle = gr[i][j].second.first;
+
+			gr[i][j].second.second = 1;
+			while (p != face[0])
+			{
+				face.push_back(p);
+
+				Point prevP = face[face.size() - 2];
+				angle = atan2(prevP.y - p.y, prevP.x - p.x);
+
+				int index = pointNumber[p];
+
+				auto it = grA[index].upper_bound({ angle, -1 });
+				if (it == grA[index].begin())
+				{
+					it = grA[index].end();
+					it--;
+				}
+				else
+				{
+					it--;
+				}
+
+				int grI = it->second;
+				angle = it->first;
+				gr[index][grI].second.second = 1;
+				p = gr[index][grI].first;
+			}
+
+			faces.push_back(face);
+		}
+	}
+
+	// find outer face
+	double maxArea = 0.0;
+	int maxAreaI = 0;
+	for (int i = 0; i < faces.size(); i++)
+	{
+		double myArea = area(faces[i]);
+
+		if (myArea > maxArea)
+		{
+			myArea = maxArea;
+			maxAreaI = i;
+		}
+	}
+	faces.erase(faces.begin() + maxAreaI);
+
+	return faces;
 }
 
 vector <Point> Algorithms::convexHull(vector <Point> points)
@@ -613,12 +740,38 @@ vector <Point> Algorithms::MAPGreedy(vector <Point> points)
 
 vector <tuple<Point, Point, Point> > Algorithms::triangulatePolygon(vector <Point> points)
 {
-	auto it = splitBySplitVertex(points);
+	vector <vector <Point> > faces1 = splitBySplitVertex(points), faces2;
 
+	for (auto face : faces1)
+	{
+		for (auto& p : face)
+		{
+			p.y = -p.y;
+		}
 
+		vector <vector <Point> > subFaces = splitBySplitVertex(face);
 
+		for (auto& subFace : subFaces)
+		{
+			for (auto& p : subFace)
+			{
+				p.y = -p.y;
+			}
 
+			faces2.push_back(subFace);
+		}
+	}
 
+	for (auto f : faces2)
+	{
+		for (auto it : f)
+		{
+			cout << "{ " << it.x << "; " << it.y << "} ";
+		}
+		cout << "\n";
+	}
+
+	// todo triangulate y-monotone polygones
 
 	return vector<tuple<Point, Point, Point> >();
 }

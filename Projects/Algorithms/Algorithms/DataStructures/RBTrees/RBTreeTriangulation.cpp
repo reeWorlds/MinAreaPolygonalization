@@ -45,6 +45,13 @@ void RBTreeTriangulation::swapColors(NodeTriangulation* x1, NodeTriangulation* x
 	swap(x1->color, x2->color);
 }
 
+void RBTreeTriangulation::swapValues(NodeTriangulation* u, NodeTriangulation* v)
+{
+	swap(u->p1, v->p1);
+	swap(u->p2, v->p2);
+	swap(u->pLast, v->pLast);
+}
+
 void RBTreeTriangulation::fixRedRed(NodeTriangulation* x)
 {
 	if (x == root)
@@ -324,7 +331,18 @@ bool RBTreeTriangulation::positionedLeft(Point p1, Point p2, Point p)
 		swap(p1, p2);
 	}
 
-	if (atan2(p.y - p1.y, p.x - p1.x) < atan2(p2.y - p1.y, p2.x - p1.x))
+	double angle = atan2(p.y - p1.y, p.x - p1.x) - atan2(p2.y - p1.y, p2.x - p1.x);
+
+	if (angle > M_PI)
+	{
+		angle -= M_PI;
+	}
+	if (angle < -M_PI)
+	{
+		angle += M_PI;
+	}
+
+	if (angle < 0.0)
 	{
 		return true;
 	}
@@ -472,7 +490,7 @@ void RBTreeTriangulation::deleteSegment(Point p1, Point p2)
 		return;
 	}
 
-	NodeTriangulation* v = search(p1, p2), * u;
+	NodeTriangulation* v = search(p1, p2);
 
 	if (v->p1 != p1 || v->p2 != p2)
 	{

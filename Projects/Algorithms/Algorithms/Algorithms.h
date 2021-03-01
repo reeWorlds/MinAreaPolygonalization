@@ -35,6 +35,7 @@ private:
 	static bool intersect(Segment s1, Segment s2);
 
 	static double area(Point p1, Point p2, Point p3);
+	static double area(vector <Point> points);
 
 	static vector <vector <int> > precalcPointsUnderStripe(vector <Point> points);
 	static int pointsInsideTriangle(vector <vector <int> >& stripes, vector<Point>& points, int i, int j, int k);
