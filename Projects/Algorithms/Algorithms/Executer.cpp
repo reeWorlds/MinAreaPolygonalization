@@ -135,15 +135,72 @@ void Executer::runMapGreedy()
 
 void Executer::testTriangulation()
 {
-	vector <Point> v1, v2;
+	vector <Point> data;
+	Point p;
 
-	v1.push_back(Point(0.0, 3.0));
-	v1.push_back(Point(3.0, 0.0));
-	v1.push_back(Point(4.0, 2.0));
-	v1.push_back(Point(7.0, 1.0));
-	v1.push_back(Point(6.0, 5.0));
-	v1.push_back(Point(5.0, 4.0));
-	v1.push_back(Point(2.0, 6.0));
+	ifstream inData("../../../Data/Temp/test4Points.txt");
+	while (inData >> p.x >> p.y)
+	{
+		data.push_back(p);
+	}
+	inData.clear();
 
-	auto it = Algorithms::triangulatePolygon(v1);
+	vector <Point> polygon = Algorithms::MAPGreedy(data);
+
+	ofstream outPoly("../../../Data/Temp/test4Polygon.txt");
+	for (auto it : polygon)
+	{
+		outPoly << it.x << " " << it.y << "\n";
+	}
+	outPoly.close();
+
+	vector <tuple<Point, Point, Point> > triangulation = Algorithms::triangulatePolygon(polygon);
+
+	///*
+	ofstream outData("../../../Data/Temp/test4Triangles.txt");
+	for (auto triangle : triangulation)
+	{
+		Point p1, p2, p3;
+
+		tie(p1, p2, p3) = triangle;
+
+		outData << p1.x << " " << p1.y << " " << p2.x << " " << p2.y << " " << p3.x << " " << p3.y << "\n";
+	}
+	outData.close(); // */
+}
+
+void Executer::runTriangulation()
+{
+	string path = "../../../Data/MAPGreedy/";
+	string pathOut = "../../../Data/Triangulation/Greedy/";
+	ifstream in("../../../Data/Generated/RECORDS.txt");
+	string name;
+
+	while (in >> name)
+	{
+		cout << "start " << name << "\n";
+
+		vector <Point> data;
+		Point p;
+
+		ifstream inData(path + name);
+		while (inData >> p.x >> p.y)
+		{
+			data.push_back(p);
+		}
+		inData.clear();
+
+		vector <tuple<Point, Point, Point> > triangulation = Algorithms::triangulatePolygon(data);
+
+		ofstream outData(pathOut + name);
+		for (auto triangle : triangulation)
+		{
+			Point p1, p2, p3;
+
+			tie(p1, p2, p3) = triangle;
+
+			outData << p1.x << " " << p1.y << " " << p2.x << " " << p2.y << " " << p3.x << " " << p3.y << "\n";
+		}
+		outData.close();
+	}
 }

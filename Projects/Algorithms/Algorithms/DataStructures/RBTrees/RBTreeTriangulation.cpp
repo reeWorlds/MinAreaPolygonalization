@@ -391,30 +391,9 @@ NodeTriangulation* RBTreeTriangulation::search(Point p1, Point p2)
 
 	while (temp != nullptr)
 	{
-		if (p1 < temp->p1)
+		if (p1 == temp->p1)
 		{
-			if (temp->left == nullptr)
-			{
-				break;
-			}
-			else
-			{
-				temp = temp->left;
-			}
-		}
-		else if (p1 > temp->p1)
-		{
-			if (temp->right == nullptr)
-			{
-				break;
-			}
-			else
-			{
-				temp = temp->right;
-			}
-		}
-		else // p1 == temp->p1
-		{
+			// p1 == temp->p1
 			if (p2 == temp->p2)
 			{
 				break;
@@ -444,6 +423,28 @@ NodeTriangulation* RBTreeTriangulation::search(Point p1, Point p2)
 					}
 				}
 			}
+		}else if (positionedLeft(temp->p1, temp->p2, p1))
+		{
+			if (temp->left == nullptr)
+			{
+				break;
+			}
+			else
+			{
+				temp = temp->left;
+			}
+		}
+		else
+		{
+			// right
+			if (temp->right == nullptr)
+			{
+				break;
+			}
+			else
+			{
+				temp = temp->right;
+			}
 		}
 	}
 
@@ -452,6 +453,11 @@ NodeTriangulation* RBTreeTriangulation::search(Point p1, Point p2)
 
 void RBTreeTriangulation::insert(Point p1, Point p2)
 {
+	if (p1.y < p2.y)
+	{
+		swap(p1, p2);
+	}
+
 	NodeTriangulation* newNode = new NodeTriangulation(p1, p2);
 
 	if (root == nullptr)

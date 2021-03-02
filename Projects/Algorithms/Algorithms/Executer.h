@@ -14,4 +14,6 @@ public:
 
 	static void testTriangulation();
 
+	static void runTriangulation();
+
 };

@@ -24,6 +24,7 @@ int main()
 	//Executer::runMapGreedy();
 
 	Executer::testTriangulation();
+	//Executer::runTriangulation();
 	
 	return 0;
 }

@@ -1,6 +1,6 @@
 #include "Drawer.h"
 
-Drawer::Drawer() : windowX(1600), windowY(900), windowShift(50), pointR(2.0)
+Drawer::Drawer() : windowX(1600), windowY(900), windowShift(50), pointR(4.0)
 {
 	timer = 0;
 }
@@ -57,6 +57,34 @@ void Drawer::readSegments(string path, sf::Color color)
 	in.close();
 }
 
+void Drawer::readTriangles(string path, sf::Color colorEdges, sf::Color colorIn)
+{
+	double x1, y1, x2, y2, x3, y3;
+	
+	ifstream in(path);
+	while (in >> x1 >> y1 >> x2 >> y2 >> x3 >> y3)
+	{
+		y1 *= -1;
+		y2 *= -1;
+		y3 *= -1;
+
+		segments.push_back(Segment(x1, y1, x2, y2));
+		segmentsColor.push_back(colorEdges);
+		segments.push_back(Segment(x2, y2, x3, y3));
+		segmentsColor.push_back(colorEdges);
+		segments.push_back(Segment(x3, y3, x1, y1));
+		segmentsColor.push_back(colorEdges);
+
+		vector <Point> shape;
+		shape.push_back(Point(x1, y1));
+		shape.push_back(Point(x2, y2));
+		shape.push_back(Point(x3, y3));
+		shapes.push_back(shape);
+		shapesColor.push_back(colorIn);
+	}
+	in.close();
+}
+
 bool Drawer::switchEvent(sf::Event event, sf::RenderWindow& window)
 {
 	if (event.type == sf::Event::Closed)
@@ -84,6 +112,22 @@ bool Drawer::switchEvent(sf::Event event, sf::RenderWindow& window)
 void Drawer::draw(sf::RenderWindow& window)
 {
 	window.clear(sf::Color::White);
+
+	for (int i = 0; i < shapesD.size(); i++)
+	{
+		sf::ConvexShape shape;
+
+		shape.setPointCount(shapesD[i].size());
+
+		for (int j = 0; j < shapesD[i].size(); j++)
+		{
+			shape.setPoint(j, sf::Vector2f(shapesD[i][j].x, shapesD[i][j].y));
+		}
+
+		shape.setFillColor(shapesColor[i]);
+
+		window.draw(shape);
+	}
 
 	for (int i = 0; i < segments.size(); i++)
 	{
@@ -161,6 +205,17 @@ void Drawer::rescaleCoordinates()
 		maxX = max(maxX, s.p2.x);
 		maxY = max(maxY, s.p2.y);
 	}
+	for (auto shape : shapes)
+	{
+		for (auto p : shape)
+		{
+			minX = min(minX, p.x);
+			maxX = max(maxX, p.x);
+
+			minY = min(minY, p.y);
+			maxY = max(maxY, p.y);
+		}
+	}
 
 	scaleX = sizeX / (maxX - minX);
 	scaleY = sizeY / (maxY - minY);
@@ -179,13 +234,25 @@ void Drawer::rescaleCoordinates()
 
 		segmentsD.push_back(Segment(p1, p2));
 	}
+	shapesD.clear();
+	for (auto shape : shapes)
+	{
+		shapesD.push_back(vector <Point>());
+		for (auto p : shape)
+		{
+			shapesD.back().push_back(Point((p.x - minX) * scale + windowShift, (p.y - minY) * scale + windowShift));
+		}
+	}
 }
 
 void Drawer::show()
 {
 	rescaleCoordinates();
 
-	sf::RenderWindow window(sf::VideoMode(windowX, windowY), "Drawer");
+	sf::ContextSettings settings;
+	settings.antialiasingLevel = 8;
+
+	sf::RenderWindow window(sf::VideoMode(windowX, windowY), "Drawer", sf::Style::Default, settings);
 
 	window.setKeyRepeatEnabled(0);
 

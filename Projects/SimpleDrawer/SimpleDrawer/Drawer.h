@@ -23,6 +23,9 @@ class Drawer
 	vector <Segment> segments, segmentsD;
 	vector <sf::Color> segmentsColor;
 
+	vector <vector <Point> > shapes, shapesD;
+	vector <sf::Color> shapesColor;
+
 	sf::Clock clock;
 	double timer;
 
@@ -42,6 +45,7 @@ public:
 	void readPoints(string path, sf::Color color);
 	void readShape(string path, sf::Color color);
 	void readSegments(string path, sf::Color color);
+	void readTriangles(string path, sf::Color colorEdges, sf::Color colorIn);
 
 	void show();
 };

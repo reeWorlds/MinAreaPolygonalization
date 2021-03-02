@@ -44,6 +44,7 @@ private:
 	static bool debug_isSimplePolygon(vector <Point> points);
 
 	static vector <vector <Point> > splitBySplitVertex(vector <Point> points);
+	static vector <tuple<Point, Point, Point> > triangulateYMonotone(vector <Point> points);
 
 public:
 

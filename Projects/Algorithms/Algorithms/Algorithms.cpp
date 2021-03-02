@@ -420,6 +420,235 @@ vector <vector <Point> > Algorithms::splitBySplitVertex(vector <Point> points)
 	return faces;
 }
 
+vector <tuple<Point, Point, Point> > Algorithms::triangulateYMonotone(vector <Point> points)
+{
+	{
+		// check for the counterclockwise order
+		int n = points.size();
+		
+		points.push_back(points[0]);
+		points.push_back(points[1]);
+
+		int maxYI = 1;
+		for (int i = 2; i <= n; i++)
+		{
+			if (points[i].y > points[maxYI].y)
+			{
+				maxYI = i;
+			}
+		}
+
+		if (angle(points[maxYI + 1] - points[maxYI]) < angle(points[maxYI - 1] - points[maxYI]))
+		{
+
+		}
+		else
+		{
+			reverse(points.begin(), points.end());
+		}
+
+		points.pop_back();
+		points.pop_back();
+	}
+
+	int minI = 0, maxI = 0;
+
+	for (int i = 0; i < points.size(); i++)
+	{
+		if (points[i].y > points[maxI].y)
+		{
+			maxI = i;
+		}
+
+		if (points[i].y < points[minI].y)
+		{
+			minI = i;
+		}
+	}
+
+	vector <Point> leftP, rightP;
+	for (int i = maxI + 1; ; i++)
+	{
+		if (i == points.size())
+		{
+			i = 0;
+		}
+		if (i == minI)
+		{
+			break;
+		}
+
+		leftP.push_back(points[i]);
+	}
+	for (int i = maxI - 1; ; i--)
+	{
+		if (i == -1)
+		{
+			i = points.size() - 1;
+		}
+		if (i == minI)
+		{
+			break;
+		}
+
+		rightP.push_back(points[i]);
+	}
+
+	vector <tuple<Point, Point, Point> > triangles;
+
+	int leftI = 0, rightI = 0;
+
+	Point mainPoint = points[maxI];
+	vector <Point> cacheL, cacheR;
+	while (leftI != leftP.size() || rightI != rightP.size())
+	{
+		if (leftI != leftP.size() && (rightI == rightP.size() || leftP[leftI].y > rightP[rightI].y))
+		{
+			//add left point
+			Point p = leftP[leftI];
+			leftI++;
+
+			// delete left triangles
+			while (cacheL.size() != 0)
+			{
+				Point prev = cacheL.back();
+				Point prev2;
+				if (cacheL.size() > 1)
+				{
+					prev2 = cacheL[cacheL.size() - 2];
+				}
+				else
+				{
+					prev2 = mainPoint;
+				}
+
+				Point reference = Point(prev.x - prev2.x, prev.y - prev2.y);
+				Point direction = Point(p.x - prev.x, p.y - prev.y);
+				double a = angle(reference, direction);
+
+				if (a > 0)
+				{
+					triangles.push_back(tuple<Point, Point, Point>(p, prev, prev2));
+					cacheL.pop_back();
+				}
+				else
+				{
+					break;
+				}
+			}
+
+			// delete right triangles
+			if (cacheR.size() != 0)
+			{
+				Point newMain = cacheR.back();
+
+				while (cacheR.size() > 0)
+				{
+					Point p1 = cacheR.back(), p2;
+					cacheR.pop_back();
+					if (cacheR.size() == 0)
+					{
+						p2 = mainPoint;
+					}
+					else
+					{
+						p2 = cacheR.back();
+					}
+
+					triangles.push_back(tuple<Point, Point, Point>(p, p1, p2));
+				}
+
+				mainPoint = newMain;
+			}
+
+			cacheL.push_back(p);
+		}
+		else
+		{
+			// add right point
+			Point p = rightP[rightI];
+			rightI++;
+
+			// delete right triangles
+			while (cacheR.size() != 0)
+			{
+				Point prev = cacheR.back();
+				Point prev2;
+				if (cacheR.size() > 1)
+				{
+					prev2 = cacheR[cacheR.size() - 2];
+				}
+				else
+				{
+					prev2 = mainPoint;
+				}
+
+				Point reference = Point(prev.x - prev2.x, prev.y - prev2.y);
+				Point direction = Point(p.x - prev.x, p.y - prev.y);
+				double a = angle(reference, direction);
+
+				if (a < 0)
+				{
+					triangles.push_back(tuple<Point, Point, Point>(p, prev, prev2));
+					cacheR.pop_back();
+				}
+				else
+				{
+					break;
+				}
+			}
+
+			// delete left triangles
+			if (cacheL.size() != 0)
+			{
+				Point newMain = cacheL.back();
+
+				while (cacheL.size() > 0)
+				{
+					Point p1 = cacheL.back(), p2;
+					cacheL.pop_back();
+					if (cacheL.size() == 0)
+					{
+						p2 = mainPoint;
+					}
+					else
+					{
+						p2 = cacheL.back();
+					}
+
+					triangles.push_back(tuple<Point, Point, Point>(p, p1, p2));
+				}
+
+				mainPoint = newMain;
+			}
+
+			cacheR.push_back(p);
+		}
+	}
+
+	Point minPoint = points[minI];
+	if (cacheL.size() != 0)
+	{
+		cacheL.insert(cacheL.begin(), mainPoint);
+
+		for (int i = 1; i < cacheL.size(); i++)
+		{
+			triangles.push_back(tuple<Point, Point, Point>(cacheL[i - 1], cacheL[i], minPoint));
+		}
+	}
+	else
+	{
+		cacheR.insert(cacheR.begin(), mainPoint);
+
+		for (int i = 1; i < cacheR.size(); i++)
+		{
+			triangles.push_back(tuple<Point, Point, Point>(cacheR[i - 1], cacheR[i], minPoint));
+		}
+	}
+
+	return triangles;
+}
+
 vector <Point> Algorithms::convexHull(vector <Point> points)
 {
 	vector <Point> res;
@@ -762,16 +991,17 @@ vector <tuple<Point, Point, Point> > Algorithms::triangulatePolygon(vector <Poin
 		}
 	}
 
-	for (auto f : faces2)
+	vector < tuple<Point, Point, Point> > triangles;
+
+	for (auto face : faces2)
 	{
-		for (auto it : f)
+		vector <tuple<Point, Point, Point> > subTriangles = triangulateYMonotone(face);
+
+		for (auto triangle : subTriangles)
 		{
-			cout << "{ " << it.x << "; " << it.y << "} ";
+			triangles.push_back(triangle);
 		}
-		cout << "\n";
 	}
 
-	// todo triangulate y-monotone polygones
-
-	return vector<tuple<Point, Point, Point> >();
+	return triangles;
 }

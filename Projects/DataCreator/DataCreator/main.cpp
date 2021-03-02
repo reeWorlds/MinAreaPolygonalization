@@ -198,14 +198,49 @@ void makeUniformCircle()
 	}
 }
 
+void tmp()
+{
+	set <double> usedX, usedY;
+	double R = 25.0;
+	int pointsN = 20;
+
+	ofstream out("../../../Data/Temp/test4Points.txt");
+	for (int i = 0; i < pointsN; i++)
+	{
+		double x = (getUniform() - 0.5) * 2.0 * R;
+		double y = (getUniform() - 0.5) * 2.0 * R;
+
+		if (usedX.find(x) != usedX.end() || usedY.find(y) != usedY.end())
+		{
+			i--;
+
+			continue;
+		}
+
+		if (x * x + y * y <= R * R)
+		{
+			out << x << " " << y << "\n";
+
+			usedX.insert(x);
+			usedY.insert(y);
+		}
+		else
+		{
+			i--;
+		}
+	}
+	out.close();
+}
+
 int main()
 {
-	makeGrids();
+	//makeGrids();
 
-	makeUniformSquare();
+	//makeUniformSquare();
 
-	makeUniformCircle();
+	//makeUniformCircle();
 
+	tmp();
 
 
 	return 0;
