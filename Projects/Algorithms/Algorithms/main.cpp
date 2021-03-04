@@ -23,8 +23,8 @@ int main()
 	//Executer::testMAPGreedy();
 	//Executer::runMapGreedy();
 
-	Executer::testTriangulation();
-	//Executer::runTriangulation();
-	
+	//Executer::testTriangulation();
+	Executer::runTriangulation();
+
 	return 0;
 }

@@ -57,6 +57,32 @@ void Drawer::readSegments(string path, sf::Color color)
 	in.close();
 }
 
+void Drawer::readPolygons(string path, sf::Color color)
+{
+	ifstream in(path);
+	int n;
+	while (in >> n)
+	{
+		vector <Point> shape;
+		Point p;
+
+		for (int i = 0; i < n; i++)
+		{
+			in >> p.x >> p.y;
+			p.y = -p.y;
+			shape.push_back(p);
+			if (i != 0)
+			{
+				segments.push_back(Segment(shape[i], shape[i - 1]));
+				segmentsColor.push_back(color);
+			}
+		}
+		segments.push_back(Segment(shape.back(), shape[0]));
+		segmentsColor.push_back(color);
+	}
+	in.close();
+}
+
 void Drawer::readTriangles(string path, sf::Color colorEdges, sf::Color colorIn)
 {
 	double x1, y1, x2, y2, x3, y3;

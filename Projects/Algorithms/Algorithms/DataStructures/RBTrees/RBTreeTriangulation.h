@@ -1,6 +1,7 @@
 #pragma once
 
 #include "NodeTriangulation.h"
+#include "../../Segment.h"
 
 class RBTreeTriangulation
 {
@@ -29,7 +30,8 @@ public:
 
 	NodeTriangulation* leftMost();
 
-	bool positionedLeft(Point p1, Point p2, Point p);
+	bool positionedLeft(Segment reference, Segment s);
+	bool positionedLeft(Segment reference, Point p);
 
 public:
 

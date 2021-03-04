@@ -298,6 +298,7 @@ vector <vector <Point> > Algorithms::splitBySplitVertex(vector <Point> points)
 		else
 		{
 			NodeTriangulation* leftSegment = tree.findFirstLeft(tree.root, p);
+			if (leftSegment == nullptr) { cout << "shit find\n"; }
 			edges.push_back({ p, leftSegment->pLast });
 			leftSegment->pLast = p;
 

@@ -202,7 +202,7 @@ void tmp()
 {
 	set <double> usedX, usedY;
 	double R = 25.0;
-	int pointsN = 20;
+	int pointsN = 6;
 
 	ofstream out("../../../Data/Temp/test4Points.txt");
 	for (int i = 0; i < pointsN; i++)

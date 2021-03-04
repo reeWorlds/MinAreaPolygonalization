@@ -45,6 +45,7 @@ public:
 	void readPoints(string path, sf::Color color);
 	void readShape(string path, sf::Color color);
 	void readSegments(string path, sf::Color color);
+	void readPolygons(string path, sf::Color color);
 	void readTriangles(string path, sf::Color colorEdges, sf::Color colorIn);
 
 	void show();

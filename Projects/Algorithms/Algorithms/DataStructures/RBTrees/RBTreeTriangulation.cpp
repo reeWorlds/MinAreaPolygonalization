@@ -324,32 +324,20 @@ NodeTriangulation* RBTreeTriangulation::leftMost()
 	return left;
 }
 
-bool RBTreeTriangulation::positionedLeft(Point p1, Point p2, Point p)
+bool RBTreeTriangulation::positionedLeft(Segment reference, Segment s)
 {
-	if (p1.y < p2.y)
-	{
-		swap(p1, p2);
-	}
+	double minY = max(reference.p2.y, s.p2.y), maxY = min(reference.p1.y, s.p1.y);
+	double y = (minY + maxY) / 2.0;
+	double referenceX = reference.getXByY(y), sX = s.getXByY(y);
 
-	double angle = atan2(p.y - p1.y, p.x - p1.x) - atan2(p2.y - p1.y, p2.x - p1.x);
+	return sX < referenceX;
+}
 
-	if (angle > M_PI)
-	{
-		angle -= M_PI;
-	}
-	if (angle < -M_PI)
-	{
-		angle += M_PI;
-	}
+bool RBTreeTriangulation::positionedLeft(Segment reference, Point p)
+{
+	double referenceX = reference.getXByY(p.y);
 
-	if (angle < 0.0)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	return p.x < referenceX;
 }
 
 RBTreeTriangulation::RBTreeTriangulation()
@@ -391,59 +379,33 @@ NodeTriangulation* RBTreeTriangulation::search(Point p1, Point p2)
 
 	while (temp != nullptr)
 	{
-		if (p1 == temp->p1)
+		if (temp->p1 == p1 && temp->p2 == p2)
 		{
-			// p1 == temp->p1
-			if (p2 == temp->p2)
-			{
-				break;
-			}
-			else
-			{
-				if (positionedLeft(temp->p1, temp->p2, p2))
-				{
-					if (temp->left == nullptr)
-					{
-						break;
-					}
-					else
-					{
-						temp = temp->left;
-					}
-				}
-				else
-				{
-					if (temp->right == nullptr)
-					{
-						break;
-					}
-					else
-					{
-						temp = temp->right;
-					}
-				}
-			}
-		}else if (positionedLeft(temp->p1, temp->p2, p1))
-		{
-			if (temp->left == nullptr)
-			{
-				break;
-			}
-			else
-			{
-				temp = temp->left;
-			}
+			break;
 		}
 		else
 		{
-			// right
-			if (temp->right == nullptr)
+			if (positionedLeft(Segment(temp->p1, temp->p2), Segment(p1, p2)))
 			{
-				break;
+				if (temp->left == nullptr)
+				{
+					break;
+				}
+				else
+				{
+					temp = temp->left;
+				}
 			}
 			else
 			{
-				temp = temp->right;
+				if (temp->right == nullptr)
+				{
+					break;
+				}
+				else
+				{
+					temp = temp->right;
+				}
 			}
 		}
 	}
@@ -476,7 +438,7 @@ void RBTreeTriangulation::insert(Point p1, Point p2)
 
 		newNode->parent = temp;
 
-		if (positionedLeft(temp->p1, temp->p2, p1))
+		if (positionedLeft(Segment(temp->p1, temp->p2), Segment(p1, p2)))
 		{
 			temp->left = newNode;
 		}
@@ -496,10 +458,17 @@ void RBTreeTriangulation::deleteSegment(Point p1, Point p2)
 		return;
 	}
 
+	if (p1.y < p2.y)
+	{
+		swap(p1, p2);
+	}
+
 	NodeTriangulation* v = search(p1, p2);
 
 	if (v->p1 != p1 || v->p2 != p2)
 	{
+		cout << "shit delete\n";
+
 		return;
 	}
 
@@ -513,7 +482,7 @@ NodeTriangulation* RBTreeTriangulation::findFirstLeft(NodeTriangulation* node, P
 		return nullptr;
 	}
 
-	if (positionedLeft(node->p1, node->p2, p))
+	if (positionedLeft(Segment(node->p1, node->p2), p))
 	{
 		return findFirstLeft(node->left, p);
 	}
