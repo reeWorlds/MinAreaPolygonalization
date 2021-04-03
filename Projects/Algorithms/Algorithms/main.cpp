@@ -24,6 +24,10 @@ int main()
 	//Executer::runMapGreedy();
 
 	//Executer::testTriangulation();
+	//Executer::runTriangulation();
+
+	//Executer::testDAC_Perm();
+	Executer::runMAPDAC();
 	Executer::runTriangulation();
 
 	return 0;

@@ -27,7 +27,7 @@ using namespace std;
 
 class Algorithms
 {
-private:
+public:
 	static double angle(Point p);
 	static double angle(Point reference, Point direction);
 
@@ -46,6 +46,8 @@ private:
 	static vector <vector <Point> > splitBySplitVertex(vector <Point> points);
 	static vector <tuple<Point, Point, Point> > triangulateYMonotone(vector <Point> points);
 
+	static vector <Point> MAPDACPrivate(vector <Point> points);
+
 public:
 
 	static vector <Point> convexHull(vector <Point> points);
@@ -53,4 +55,8 @@ public:
 	static vector <Point> MAPGreedy(vector <Point> points);
 
 	static vector <tuple<Point, Point, Point> > triangulatePolygon(vector <Point> points);
+
+	static vector <Point> MAPPermuteReject(vector <Point> points);
+
+	static vector <Point> MAPDAC(vector <Point> points);
 };

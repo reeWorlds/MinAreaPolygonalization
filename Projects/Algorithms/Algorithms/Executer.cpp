@@ -17,7 +17,7 @@ void Executer::buildConvexHullForGeneratedData()
 		{
 			data.push_back(p);
 		}
-		inData.clear();
+		inData.close();
 
 		vector <Point> CH = Algorithms::convexHull(data);
 
@@ -120,7 +120,7 @@ void Executer::runMapGreedy()
 		{
 			data.push_back(p);
 		}
-		inData.clear();
+		inData.close();
 
 		vector <Point> polygon = Algorithms::MAPGreedy(data);
 
@@ -131,6 +131,8 @@ void Executer::runMapGreedy()
 		}
 		outData.close();
 	}
+
+	in.close();
 }
 
 void Executer::testTriangulation()
@@ -143,7 +145,7 @@ void Executer::testTriangulation()
 	{
 		data.push_back(p);
 	}
-	inData.clear();
+	inData.close();
 
 	vector <Point> polygon = Algorithms::MAPGreedy(data);
 
@@ -171,8 +173,11 @@ void Executer::testTriangulation()
 
 void Executer::runTriangulation()
 {
-	string path = "../../../Data/MAPGreedy/";
-	string pathOut = "../../../Data/Triangulation/Greedy/";
+	//string path = "../../../Data/MAPGreedy/";
+	//string pathOut = "../../../Data/Triangulation/Greedy/";
+	
+	string path = "../../../Data/MAPDAC/";
+	string pathOut = "../../../Data/Triangulation/DAC/";
 	ifstream in("../../../Data/Generated/RECORDS.txt");
 	string name;
 
@@ -188,9 +193,21 @@ void Executer::runTriangulation()
 		{
 			data.push_back(p);
 		}
-		inData.clear();
+		inData.close();
 
 		vector <tuple<Point, Point, Point> > triangulation = Algorithms::triangulatePolygon(data);
+
+		double area = abs(Algorithms::area(data));
+		double areaT = 0.0;
+		for (auto it : triangulation)
+		{
+			Point p1, p2, p3;
+			tie(p1, p2, p3) = it;
+
+			areaT += Algorithms::area(p1, p2, p3);
+		}
+
+		cout << area << " " << areaT << "\n";
 
 		ofstream outData(pathOut + name);
 		for (auto triangle : triangulation)
@@ -200,6 +217,77 @@ void Executer::runTriangulation()
 			tie(p1, p2, p3) = triangle;
 
 			outData << p1.x << " " << p1.y << " " << p2.x << " " << p2.y << " " << p3.x << " " << p3.y << "\n";
+		}
+		outData.close();
+	}
+
+	in.close();
+}
+
+void Executer::testDAC_Perm()
+{
+	vector <Point> data;
+	Point p;
+
+	ifstream inData("../../../Data/Temp/test5Points.txt");
+	while (inData >> p.x >> p.y)
+	{
+		data.push_back(p);
+	}
+	inData.close();
+
+	//vector <Point> polygon = Algorithms::MAPPermuteReject(data);
+	vector <Point> polygon = Algorithms::MAPDAC(data);
+
+	ofstream outPoly("../../../Data/Temp/test5Polygon.txt");
+	for (auto it : polygon)
+	{
+		outPoly << it.x << " " << it.y << "\n";
+	}
+	outPoly.close();
+
+	//vector <tuple<Point, Point, Point> > triangulation = Algorithms::triangulatePolygon(polygon);
+
+	/*
+	ofstream outData("../../../Data/Temp/test4Triangles.txt");
+	for (auto triangle : triangulation)
+	{
+		Point p1, p2, p3;
+
+		tie(p1, p2, p3) = triangle;
+
+		outData << p1.x << " " << p1.y << " " << p2.x << " " << p2.y << " " << p3.x << " " << p3.y << "\n";
+	}
+	outData.close(); // */
+}
+
+void Executer::runMAPDAC()
+{
+	string path = "../../../Data/Generated/";
+	string pathOut = "../../../Data/MAPDAC/";
+	ifstream in(path + "RECORDS.txt");
+	string name;
+
+	while (in >> name)
+	{
+		cout << "start " << name << "\n";
+
+		vector <Point> data;
+		Point p;
+
+		ifstream inData(path + name);
+		while (inData >> p.x >> p.y)
+		{
+			data.push_back(p);
+		}
+		inData.close();
+
+		vector <Point> polygon = Algorithms::MAPDAC(data);
+
+		ofstream outData(pathOut + name);
+		for (auto it : polygon)
+		{
+			outData << it.x << " " << it.y << "\n";
 		}
 		outData.close();
 	}

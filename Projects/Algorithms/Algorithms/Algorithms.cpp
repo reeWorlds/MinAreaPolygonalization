@@ -298,7 +298,6 @@ vector <vector <Point> > Algorithms::splitBySplitVertex(vector <Point> points)
 		else
 		{
 			NodeTriangulation* leftSegment = tree.findFirstLeft(tree.root, p);
-			if (leftSegment == nullptr) { cout << "shit find\n"; }
 			edges.push_back({ p, leftSegment->pLast });
 			leftSegment->pLast = p;
 
@@ -1005,4 +1004,265 @@ vector <tuple<Point, Point, Point> > Algorithms::triangulatePolygon(vector <Poin
 	}
 
 	return triangles;
+}
+
+vector <Point> Algorithms::MAPPermuteReject(vector <Point> points)
+{
+	points.push_back(points[0]);
+	vector <Point> bestPolygon = points;
+	double bestArea = 1.0e9;
+
+	long long factorial = 1;
+	for (int i = 2; i < points.size() - 1; i++)
+	{
+		factorial *= (long long)i;
+	}
+
+	for (long long f = 0; f < factorial; f++)
+	{
+		int isOk = 1;
+
+		for (int i = 1; i < points.size(); i++)
+		{
+			for (int j = i + 2; j < points.size(); j++)
+			{
+				if (intersect(Segment(points[i - 1], points[i]), Segment(points[j - 1], points[j])))
+				{
+					isOk = 0;
+
+					break;
+				}
+			}
+
+			if (isOk == 0)
+			{
+				break;
+			}
+		}
+
+		if (isOk == 1)
+		{
+			double currentArea = abs(area(points));
+
+			if (currentArea < bestArea)
+			{
+				bestArea = currentArea;
+				bestPolygon = points;
+			}
+		}
+
+		next_permutation(points.begin() + 1, --points.end());
+	}
+	
+	bestPolygon.pop_back();
+	return bestPolygon;
+}
+
+vector <Point> Algorithms::MAPDACPrivate(vector <Point> points)
+{
+	if (points.size() < 6)
+	{
+		return MAPPermuteReject(points);
+	}
+	int n = points.size();
+
+	vector <Point> points1, points2;
+	for (int i = 0; i < points.size(); i++)
+	{
+		if (i < (points.size() + 1) / 2)
+		{
+			points1.push_back(points[i]);
+		}
+		else
+		{
+			points2.push_back(points[i]);
+		}
+	}
+
+	vector <Point> poly1 = MAPDACPrivate(points1), poly2 = MAPDACPrivate(points2);
+
+	// combine 2 polygons
+	int n1 = poly1.size(), n2 = poly2.size();
+	poly1.push_back(poly1[0]);
+	poly2.push_back(poly2[0]);
+	
+	int bestI1, bestI2, bestJ1, bestJ2; // I1 -> I2 -> J2 -> J1 -> I1
+	double minQArea = 1.0e9; // minQuadrilateralArea
+
+	vector <int> prevVis, curVis;
+	// check intersections for 0
+	for (int j = 0; j < poly2.size(); j++)
+	{
+		int isOk = 1;
+		Segment s = Segment(poly1[0], poly2[j]);
+
+		for (int ii = 1; ii < poly1.size(); ii++)
+		{
+			if (poly1[ii] == poly1[0] || poly1[ii - 1] == poly1[0])
+			{
+				continue;
+			}
+
+			if (intersect(s, Segment(poly1[ii - 1], poly1[ii])))
+			{
+				isOk = 0;
+
+				break;
+			}
+		}
+
+		if (isOk == 0)
+		{
+			prevVis.push_back(0);
+
+			continue;
+		}
+
+		for (int jj = 1; jj < poly2.size(); jj++)
+		{
+			if (poly2[jj] == poly2[j] || poly2[jj - 1] == poly2[j])
+			{
+				continue;
+			}
+
+			if (intersect(s, Segment(poly2[jj - 1], poly2[jj])))
+			{
+				isOk = 0;
+
+				break;
+			}
+		}
+
+		prevVis.push_back(isOk);
+	}
+
+	for (int i = 1; i < poly1.size(); i++)
+	{
+		// calc visibility
+		for (int j = 0; j < poly2.size(); j++)
+		{
+			int isOk = 1;
+			Segment s = Segment(poly1[i], poly2[j]);
+
+			for (int ii = 1; ii < poly1.size(); ii++)
+			{
+				if (poly1[ii] == poly1[i] || poly1[ii - 1] == poly1[i])
+				{
+					continue;
+				}
+
+				if (intersect(s, Segment(poly1[ii - 1], poly1[ii])))
+				{
+					isOk = 0;
+
+					break;
+				}
+			}
+
+			if (isOk == 0)
+			{
+				curVis.push_back(0);
+
+				continue;
+			}
+
+			for (int jj = 1; jj < poly2.size(); jj++)
+			{
+				if (poly2[jj] == poly2[j] || poly2[jj - 1] == poly2[j])
+				{
+					continue;
+				}
+
+				if (intersect(s, Segment(poly2[jj - 1], poly2[jj])))
+				{
+					isOk = 0;
+
+					break;
+				}
+			}
+
+			curVis.push_back(isOk);
+		}
+
+		// calc possible quads
+		for (int k = 1; k < prevVis.size(); k++)
+		{
+			if (prevVis[k - 1] == 1 && curVis[k] == 1)
+			{
+				if (!intersect(Segment(poly1[i - 1], poly2[k - 1]), Segment(poly1[i], poly2[k])))
+				{
+					vector <Point> quad;
+					quad.push_back(poly1[i - 1]);
+					quad.push_back(poly1[i]);
+					quad.push_back(poly2[k]);
+					quad.push_back(poly2[k - 1]);
+					double QArea = abs(area(quad));
+
+					if (QArea < minQArea)
+					{
+						minQArea = QArea;
+						bestI1 = i - 1;
+						bestI2 = i;
+						bestJ2 = k;
+						bestJ1 = k - 1;
+					}
+				}
+			}
+
+			if (prevVis[k] == 1 && curVis[k - 1] == 1)
+			{
+				if (!intersect(Segment(poly1[i - 1], poly2[k]), Segment(poly1[i], poly2[k - 1])))
+				{
+					vector <Point> quad;
+					quad.push_back(poly1[i - 1]);
+					quad.push_back(poly1[i]);
+					quad.push_back(poly2[k - 1]);
+					quad.push_back(poly2[k]);
+					double QArea = abs(area(quad));
+
+					if (QArea < minQArea)
+					{
+						minQArea = QArea;
+						bestI1 = i - 1;
+						bestI2 = i;
+						bestJ2 = k - 1;
+						bestJ1 = k;
+					}
+				}
+			}
+		}
+
+		prevVis = curVis;
+		curVis.clear();
+	}
+
+	// merge polygons based on best quad
+	vector <Point> result;
+	for (int i = 0; i < n1; i++)
+	{
+		result.push_back(poly1[(bestI1 - i + n1) % n1]);
+	}
+	if (bestJ2 < bestJ1)
+	{
+		for (int i = 0; i < n2; i++)
+		{
+			result.push_back(poly2[(bestJ2 - i + n2) % n2]);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < n2; i++)
+		{
+			result.push_back(poly2[(bestJ2 + i) % n2]);
+		}
+	}
+
+	return result;
+}
+
+vector <Point> Algorithms::MAPDAC(vector <Point> points)
+{
+	sort(points.begin(), points.end());
+
+	return MAPDACPrivate(points);
 }

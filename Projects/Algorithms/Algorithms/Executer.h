@@ -16,4 +16,8 @@ public:
 
 	static void runTriangulation();
 
+	static void testDAC_Perm();
+
+	static void runMAPDAC();
+
 };
