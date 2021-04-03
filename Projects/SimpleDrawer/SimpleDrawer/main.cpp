@@ -10,8 +10,8 @@ int main()
 {
 	Drawer drawer;
 
-	/*
-	string name = "0_square.txt";
+	//*
+	string name = "0_grid.txt";
 	drawer.readTriangles("../../../Data/Triangulation/Greedy/" + name, sf::Color::Green, sf::Color::Cyan);
 	drawer.readPoints("../../../Data/Generated/" + name, sf::Color::Black);
 	drawer.readShape("../../../Data/MAPGreedy/" + name, sf::Color::Blue);
@@ -25,8 +25,8 @@ int main()
 	//*/
 
 
-	//*
-	string name = "9_square.txt";
+	/*
+	string name = "0_grid.txt";
 	drawer.readTriangles("../../../Data/Triangulation/DAC/" + name, sf::Color::Green, sf::Color::Cyan);
 	drawer.readPoints("../../../Data/Generated/" + name, sf::Color::Black);
 	drawer.readShape("../../../Data/MAPDAC/" + name, sf::Color::Blue);

@@ -20,4 +20,7 @@ public:
 
 	static void runMAPDAC();
 
+
+
+	static void compareResults();
 };

@@ -343,14 +343,14 @@ vector <vector <Point> > Algorithms::splitBySplitVertex(vector <Point> points)
 		{// s.p1
 			double angle = atan2(s.p2.y - s.p1.y, s.p2.x - s.p1.x);
 
-			grA[i1].insert({ angle, gr[i1].size() });
+			grA[i1].insert({ angle, int(gr[i1].size()) });
 			gr[i1].push_back({ s.p2, {angle, 0 } });
 		}
 
 		{// s.p2
 			double angle = atan2(s.p1.y - s.p2.y, s.p1.x - s.p2.x);
 
-			grA[i2].insert({ angle, gr[i2].size() });
+			grA[i2].insert({ angle, int(gr[i2].size()) });
 			gr[i2].push_back({ s.p1, {angle, 0 } });
 		}
 	}

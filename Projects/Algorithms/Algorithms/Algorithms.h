@@ -27,15 +27,12 @@ using namespace std;
 
 class Algorithms
 {
-public:
+private:
 	static double angle(Point p);
 	static double angle(Point reference, Point direction);
 
 	static int rotationType(Point v1, Point v2);
 	static bool intersect(Segment s1, Segment s2);
-
-	static double area(Point p1, Point p2, Point p3);
-	static double area(vector <Point> points);
 
 	static vector <vector <int> > precalcPointsUnderStripe(vector <Point> points);
 	static int pointsInsideTriangle(vector <vector <int> >& stripes, vector<Point>& points, int i, int j, int k);
@@ -49,6 +46,9 @@ public:
 	static vector <Point> MAPDACPrivate(vector <Point> points);
 
 public:
+
+	static double area(Point p1, Point p2, Point p3);
+	static double area(vector <Point> points);
 
 	static vector <Point> convexHull(vector <Point> points);
 

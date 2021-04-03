@@ -27,8 +27,12 @@ int main()
 	//Executer::runTriangulation();
 
 	//Executer::testDAC_Perm();
-	Executer::runMAPDAC();
-	Executer::runTriangulation();
+	//Executer::runMAPDAC();
+	//Executer::runTriangulation();
+
+
+
+	Executer::compareResults();
 
 	return 0;
 }

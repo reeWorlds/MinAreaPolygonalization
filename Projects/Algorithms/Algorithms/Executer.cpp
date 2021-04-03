@@ -197,18 +197,6 @@ void Executer::runTriangulation()
 
 		vector <tuple<Point, Point, Point> > triangulation = Algorithms::triangulatePolygon(data);
 
-		double area = abs(Algorithms::area(data));
-		double areaT = 0.0;
-		for (auto it : triangulation)
-		{
-			Point p1, p2, p3;
-			tie(p1, p2, p3) = it;
-
-			areaT += Algorithms::area(p1, p2, p3);
-		}
-
-		cout << area << " " << areaT << "\n";
-
 		ofstream outData(pathOut + name);
 		for (auto triangle : triangulation)
 		{
@@ -290,5 +278,44 @@ void Executer::runMAPDAC()
 			outData << it.x << " " << it.y << "\n";
 		}
 		outData.close();
+	}
+}
+
+void Executer::compareResults()
+{
+	vector <string> paths;
+	paths.push_back("../../../Data/MAPDAC/");
+	paths.push_back("../../../Data/MAPGreedy/");
+	ifstream in("../../../Data/Generated/RECORDS.txt");
+	string name;
+
+	for (int i = 0; i < paths.size(); i++)
+	{
+		cout << i << ") " << paths[i] << "\n";
+	}
+	cout << "\n\n";
+
+	while (in >> name)
+	{
+		cout << name << ":";
+
+		for (string path : paths)
+		{
+			vector <Point> data;
+			Point p;
+
+			ifstream inData(path + name);
+			while (inData >> p.x >> p.y)
+			{
+				data.push_back(p);
+			}
+			inData.close();
+
+			double area = abs(Algorithms::area(data));
+
+			cout << " " << area;
+		}
+
+		cout << "\n";
 	}
 }
