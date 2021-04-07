@@ -30,7 +30,18 @@ int main()
 	//Executer::runMAPDAC();
 	//Executer::runTriangulation();
 
+	//Executer::runMAPDAC2();
+	//Executer::runTriangulation();
 
+	//Executer::runMAP_RAND();
+	//Executer::runTriangulation();
+
+	//Executer::testMAP_RS();
+	//Executer::runMAP_RS();
+	//Executer::runTriangulation();
+
+	//Executer::runMAP_Postprocess();
+	//Executer::runTriangulationrunMAP_Postprocess();
 
 	Executer::compareResults();
 

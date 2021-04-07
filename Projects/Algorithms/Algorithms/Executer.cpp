@@ -176,8 +176,17 @@ void Executer::runTriangulation()
 	//string path = "../../../Data/MAPGreedy/";
 	//string pathOut = "../../../Data/Triangulation/Greedy/";
 	
-	string path = "../../../Data/MAPDAC/";
-	string pathOut = "../../../Data/Triangulation/DAC/";
+	//string path = "../../../Data/MAPDAC/";
+	//string pathOut = "../../../Data/Triangulation/DAC/";
+
+	//string path = "../../../Data/MAPDAC2/";
+	//string pathOut = "../../../Data/Triangulation/DAC2/";
+
+	//string path = "../../../Data/MAP_RAND/";
+	//string pathOut = "../../../Data/Triangulation/RAND/";
+	
+	string path = "../../../Data/MAP_RS/";
+	string pathOut = "../../../Data/Triangulation/RS/";
 	ifstream in("../../../Data/Generated/RECORDS.txt");
 	string name;
 
@@ -281,11 +290,188 @@ void Executer::runMAPDAC()
 	}
 }
 
+void Executer::runMAPDAC2()
+{
+	string path = "../../../Data/Generated/";
+	string pathOut = "../../../Data/MAPDAC2/";
+	ifstream in(path + "RECORDS.txt");
+	string name;
+
+	while (in >> name)
+	{
+		cout << "start " << name << "\n";
+
+		vector <Point> data;
+		Point p;
+
+		ifstream inData(path + name);
+		while (inData >> p.x >> p.y)
+		{
+			data.push_back(p);
+		}
+		inData.close();
+
+		vector <Point> polygon = Algorithms::MAPDAC2(data);
+
+		ofstream outData(pathOut + name);
+		for (auto it : polygon)
+		{
+			outData << it.x << " " << it.y << "\n";
+		}
+		outData.close();
+	}
+}
+
+void Executer::runMAP_RAND()
+{
+	string path = "../../../Data/Generated/";
+	string pathOut = "../../../Data/MAP_RAND/";
+	ifstream in(path + "RECORDS.txt");
+	string name;
+
+	while (in >> name)
+	{
+		cout << "start " << name << "\n";
+
+		vector <Point> data;
+		Point p;
+
+		ifstream inData(path + name);
+		while (inData >> p.x >> p.y)
+		{
+			data.push_back(p);
+		}
+		inData.close();
+
+		vector <Point> polygon = Algorithms::MAP_RAND(data);
+
+		ofstream outData(pathOut + name);
+		for (auto it : polygon)
+		{
+			outData << it.x << " " << it.y << "\n";
+		}
+		outData.close();
+	}
+}
+
+void Executer::testMAP_RS()
+{
+	mt19937 rng(47);
+
+	while (true)
+	{
+		vector <Point> poly;
+		for (int i = 0; i < 40; i++)
+		{
+			Point p;
+			p.x = rng() % 1000000 / 100000.0;
+			p.y = rng() % 1000000 / 100000.0;
+
+			poly.push_back(p);
+		}
+
+		auto pp = Algorithms::MAP_RS(poly);
+	}
+}
+
+void Executer::runMAP_RS()
+{
+	string path = "../../../Data/Generated/";
+	string pathOut = "../../../Data/MAP_RS/";
+	ifstream in(path + "RECORDS.txt");
+	string name;
+
+	while (in >> name)
+	{
+		cout << "start " << name << "\n";
+
+		vector <Point> data;
+		Point p;
+
+		ifstream inData(path + name);
+		while (inData >> p.x >> p.y)
+		{
+			data.push_back(p);
+		}
+		inData.close();
+
+		vector <Point> polygon = Algorithms::MAP_RS(data);
+
+		ofstream outData(pathOut + name);
+		for (auto it : polygon)
+		{
+			outData << it.x << " " << it.y << "\n";
+		}
+		outData.close();
+	}
+}
+
+void Executer::runMAP_Postprocess()
+{
+	vector <pair<string, string> > paths;
+	paths.push_back({ "../../../Data/MAPDAC2/", "../../../Data/Postprocess/MAPDAC2/" });
+	paths.push_back({ "../../../Data/MAPDAC/", "../../../Data/Postprocess/MAPDAC/" });
+	paths.push_back({ "../../../Data/MAPGreedy/", "../../../Data/Postprocess/MAPGreedy/" });
+	paths.push_back({ "../../../Data/MAP_RAND/", "../../../Data/Postprocess/MAP_RAND/" });
+	paths.push_back({ "../../../Data/MAP_RS/", "../../../Data/Postprocess/MAP_RS/" });
+
+	ifstream in("../../../Data/Generated/RECORDS.txt");
+	vector <string> names;
+	string _name;
+
+	while (in >> _name)
+	{
+		names.push_back(_name);
+	}
+
+	for (auto path : paths)
+	{
+		cout << "start path = " << path.first << "\n";
+
+		for (auto name : names)
+		{
+			ifstream dataIn(path.first + name);
+			ofstream dataOut(path.second + name);
+
+			vector <Point> poly;
+			Point p;
+
+			while (dataIn >> p.x >> p.y)
+			{
+				poly.push_back(p);
+			}
+
+			vector <Point> newPoly = Algorithms::MAP_Postprocess(poly);
+
+			for (auto it : newPoly)
+			{
+				dataOut << it.x << " " << it.y << "\n";
+			}
+
+			double oldArea = abs(Algorithms::area(poly)), newArea = abs(Algorithms::area(newPoly));
+
+			cout << name << " " << oldArea << " -> " << newArea << "   " << (newArea / oldArea) * 100.0 << "%\n";
+		}
+
+		cout << "\n\n";
+	}
+}
+
 void Executer::compareResults()
 {
 	vector <string> paths;
+	paths.push_back("../../../Data/MAPDAC2/");
 	paths.push_back("../../../Data/MAPDAC/");
 	paths.push_back("../../../Data/MAPGreedy/");
+	paths.push_back("../../../Data/MAP_RAND/");
+	paths.push_back("../../../Data/MAP_RS/");
+
+	paths.push_back("../../../Data/Postprocess/MAPDAC2/");
+	paths.push_back("../../../Data/Postprocess/MAPDAC/");
+	paths.push_back("../../../Data/Postprocess/MAPGreedy/");
+	paths.push_back("../../../Data/Postprocess/MAP_RAND/");
+	paths.push_back("../../../Data/Postprocess/MAP_RS/");
+
 	ifstream in("../../../Data/Generated/RECORDS.txt");
 	string name;
 
@@ -313,7 +499,7 @@ void Executer::compareResults()
 
 			double area = abs(Algorithms::area(data));
 
-			cout << " " << area;
+			cout << "\t" << area;
 		}
 
 		cout << "\n";

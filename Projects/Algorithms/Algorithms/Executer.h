@@ -20,7 +20,15 @@ public:
 
 	static void runMAPDAC();
 
+	static void runMAPDAC2();
 
+	static void runMAP_RAND();
+
+	static void testMAP_RS();
+
+	static void runMAP_RS();
+
+	static void runMAP_Postprocess();
 
 	static void compareResults();
 };

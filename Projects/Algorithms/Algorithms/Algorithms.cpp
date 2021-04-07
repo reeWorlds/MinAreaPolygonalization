@@ -38,6 +38,28 @@ bool Algorithms::intersect(Segment s1, Segment s2)
 	}
 }
 
+double Algorithms::dist(Point p1, Point p2)
+{
+	return sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+}
+
+double Algorithms::distanceToSegment(Segment s, Point p)
+{
+	double dist = min(sqrt((s.p1.x - p.x)*(s.p1.x - p.x) + (s.p1.y - p.y)*(s.p1.y - p.y)),
+		sqrt((s.p2.x - p.x) * (s.p2.x - p.x) + (s.p2.y - p.y) * (s.p2.y - p.y)));
+
+	if (abs(angle(Point(s.p2.x - s.p1.x, s.p2.y - s.p1.y), Point(p.x - s.p2.x, p.y - s.p2.y))) > M_PI / 2.0 &&
+		abs(angle(Point(s.p1.x - s.p2.x, s.p1.y - s.p2.y), Point(p.x - s.p1.x, p.y - s.p1.y))) > M_PI / 2.0)
+	{
+		double len = sqrt((s.p1.x - s.p2.x) * (s.p1.x - s.p2.x) + (s.p1.y - s.p2.y) * (s.p1.y - s.p2.y));
+		double altDist = abs((s.p2.x - s.p1.x) * (s.p1.y - p.y) - (s.p1.x - p.x) * (s.p2.y - s.p1.y)) / len;
+
+		dist = min(dist, altDist);
+	}
+
+	return dist;
+}
+
 double Algorithms::area(Point p1, Point p2, Point p3)
 {
 	return 0.5 * abs((p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x));
@@ -45,6 +67,11 @@ double Algorithms::area(Point p1, Point p2, Point p3)
 
 double Algorithms::area(vector <Point> points)
 {
+	if (points.size() == 0)
+	{
+		return 0.0;
+	}
+
 	points.push_back(points[0]);
 
 	double res = 0.0;
@@ -165,7 +192,7 @@ int Algorithms::debug_pointsInsideTriangle(vector <Point>& points, int i, int j,
 
 		if (abs(ts - s) < 1.0e-8)
 		{
-res++;
+			res++;
 		}
 	}
 
@@ -649,6 +676,44 @@ vector <tuple<Point, Point, Point> > Algorithms::triangulateYMonotone(vector <Po
 	return triangles;
 }
 
+bool Algorithms::isInside(vector <Point> poly, Point p)
+{
+	double windmill = 0.0;
+
+	for (int i = 1; i < poly.size(); i++)
+	{
+		windmill += angle(Point(poly[i - 1].x - p.x, poly[i - 1].y - p.y), Point(poly[i].x - p.x, poly[i].y - p.y));
+	}
+	windmill += angle(Point(poly.back().x - p.x, poly.back().y - p.y), Point(poly[0].x - p.x, poly[0].y - p.y));
+
+	// windmill ~= -2Pi/0/2Pi
+
+	if (abs(windmill) < 0.5)
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
+bool Algorithms::isInside(Point p1, Point p2, Point p3, Point p)
+{
+	double s = area(p1, p2, p3);
+
+	double ts = area(p1, p2, p) + area(p2, p3, p) + area(p3, p1, p);
+
+	if (abs(s - ts) < 1.0e-8)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 vector <Point> Algorithms::convexHull(vector <Point> points)
 {
 	vector <Point> res;
@@ -866,7 +931,7 @@ vector <Point> Algorithms::MAPGreedy(vector <Point> points)
 			info[i].clearInvalidSegments();
 		}		
 
-		// chech if new triangles are possible
+		// check if new triangles are possible
 		for (int i = 0; i < input.size(); i++)
 		{
 			Point np1 = p1, np2 = input[i].first, np3 = p2;
@@ -1058,35 +1123,13 @@ vector <Point> Algorithms::MAPPermuteReject(vector <Point> points)
 	return bestPolygon;
 }
 
-vector <Point> Algorithms::MAPDACPrivate(vector <Point> points)
+vector <Point> Algorithms::DACMergePolygons(vector <Point> poly1, vector <Point> poly2)
 {
-	if (points.size() < 6)
-	{
-		return MAPPermuteReject(points);
-	}
-	int n = points.size();
-
-	vector <Point> points1, points2;
-	for (int i = 0; i < points.size(); i++)
-	{
-		if (i < (points.size() + 1) / 2)
-		{
-			points1.push_back(points[i]);
-		}
-		else
-		{
-			points2.push_back(points[i]);
-		}
-	}
-
-	vector <Point> poly1 = MAPDACPrivate(points1), poly2 = MAPDACPrivate(points2);
-
-	// combine 2 polygons
 	int n1 = poly1.size(), n2 = poly2.size();
 	poly1.push_back(poly1[0]);
 	poly2.push_back(poly2[0]);
-	
-	int bestI1, bestI2, bestJ1, bestJ2; // I1 -> I2 -> J2 -> J1 -> I1
+
+	int bestI1 = -1, bestI2 = -1, bestJ1 = -1, bestJ2 = -1; // I1 -> I2 -> J2 -> J1 -> I1
 	double minQArea = 1.0e9; // minQuadrilateralArea
 
 	vector <int> prevVis, curVis;
@@ -1236,6 +1279,11 @@ vector <Point> Algorithms::MAPDACPrivate(vector <Point> points)
 		curVis.clear();
 	}
 
+	if (bestI1 == -1)
+	{
+		return vector <Point>();
+	}
+
 	// merge polygons based on best quad
 	vector <Point> result;
 	for (int i = 0; i < n1; i++)
@@ -1260,9 +1308,2491 @@ vector <Point> Algorithms::MAPDACPrivate(vector <Point> points)
 	return result;
 }
 
+vector <Point> Algorithms::MAPDACPrivate(vector <Point> points)
+{
+	if (points.size() < 6)
+	{
+		return MAPPermuteReject(points);
+	}
+	int n = points.size();
+
+	vector <Point> points1, points2;
+	for (int i = 0; i < points.size(); i++)
+	{
+		if (i < (points.size() + 1) / 2)
+		{
+			points1.push_back(points[i]);
+		}
+		else
+		{
+			points2.push_back(points[i]);
+		}
+	}
+
+	vector <Point> poly1 = MAPDACPrivate(points1), poly2 = MAPDACPrivate(points2);
+
+	// combine 2 polygons
+	vector <Point> result = DACMergePolygons(poly1, poly2);
+
+	return result;
+}
+
 vector <Point> Algorithms::MAPDAC(vector <Point> points)
 {
 	sort(points.begin(), points.end());
 
 	return MAPDACPrivate(points);
+}
+
+pair<vector <Point>, vector <Point> > Algorithms::MAPDAC2Private(vector <Point> points)
+{
+	if (points.size() < 6)
+	{
+		vector <Point> result = MAPPermuteReject(points);
+
+		return { result, result };
+	}
+
+	pair<double, double> areas = { 1.0e9, 1.0e9 };
+	pair<vector <Point>, vector <Point> > result; // {vertical, horizontal}
+	int n = points.size();
+
+	{// vertical
+		sort(points.begin(), points.end());
+
+		vector <Point> points1, points2;
+		for (int i = 0; i < points.size(); i++)
+		{
+			if (i < (points.size() + 1) / 2)
+			{
+				points1.push_back(points[i]);
+			}
+			else
+			{
+				points2.push_back(points[i]);
+			}
+		}
+
+		auto solLeft = MAPDAC2Private(points1), solRight = MAPDAC2Private(points2);
+
+		vector <vector <Point> > results;
+		results.push_back(DACMergePolygons(solLeft.first, solRight.first));
+		results.push_back(DACMergePolygons(solLeft.first, solRight.second));
+		results.push_back(DACMergePolygons(solLeft.second, solRight.first));
+		results.push_back(DACMergePolygons(solLeft.second, solRight.second));
+
+		for (auto& poly : results)
+		{
+			if (poly.size() == 0)
+			{
+				continue;
+			}
+
+			double polyArea = abs(area(poly));
+
+			if (polyArea < areas.first)
+			{
+				areas.first = polyArea;
+				result.first = poly;
+			}
+		}
+	}
+
+	{// horizontal
+		for (auto& it : points)
+		{
+			swap(it.x, it.y);
+		}
+		sort(points.begin(), points.end());
+		for (auto& it : points)
+		{
+			swap(it.x, it.y);
+		}
+
+		vector <Point> points1, points2;
+		for (int i = 0; i < points.size(); i++)
+		{
+			if (i < (points.size() + 1) / 2)
+			{
+				points1.push_back(points[i]);
+			}
+			else
+			{
+				points2.push_back(points[i]);
+			}
+		}
+
+		auto solDown = MAPDAC2Private(points1), solUp = MAPDAC2Private(points2);
+
+		vector <vector <Point> > results;
+		results.push_back(DACMergePolygons(solDown.first, solUp.first));
+		results.push_back(DACMergePolygons(solDown.first, solUp.second));
+		results.push_back(DACMergePolygons(solDown.second, solUp.first));
+		results.push_back(DACMergePolygons(solDown.second, solUp.second));
+
+		for (auto& poly : results)
+		{
+			if (poly.size() == 0)
+			{
+				continue;
+			}
+
+			double polyArea = abs(area(poly));
+
+			if (polyArea < areas.second)
+			{
+				areas.second = polyArea;
+				result.second = poly;
+			}
+		}
+	}
+
+	return result;
+}
+
+vector <Point> Algorithms::MAPDAC2(vector <Point> points)
+{
+	pair<vector <Point>, vector <Point> > result = MAPDAC2Private(points);
+
+	double area1 = abs(area(result.first)), area2 = abs(area(result.second));
+
+	if (area1 < area2)
+	{
+		return result.first;
+	}
+	else
+	{
+		return result.second;
+	}
+}
+
+vector <Point> Algorithms::MAP_RANDPrivate(vector <Point> points, mt19937& rng)
+{
+	vector <Point> pointsCopy = points;
+
+	vector <Point> poly;
+	
+	{// initial triangle
+		int i;
+
+		i = rng() % points.size();
+		poly.push_back(points[i]);
+		points.erase(points.begin() + i);
+
+		i = rng() % points.size();
+		poly.push_back(points[i]);
+		points.erase(points.begin() + i);
+
+		i = rng() % points.size();
+		poly.push_back(points[i]);
+		points.erase(points.begin() + i);
+	}
+
+	while (points.size() > 0)
+	{
+		int index = rng() % points.size();
+		Point p = points[index];
+		points.erase(points.begin() + index);
+
+		vector <int> visible;
+		int polyN = poly.size();
+
+		poly.push_back(poly[0]);
+		for (int i = 0; i < polyN; i++)
+		{
+			Segment s(p, poly[i]);
+
+			int isOk = 1;
+
+			for (int j = 1; j <= polyN; j++)
+			{
+				if (poly[j - 1] != s.p2 && poly[j] != s.p2)
+				{
+					if (intersect(s, Segment(poly[j - 1], poly[j])))
+					{
+						isOk = 0;
+
+						break;
+					}
+				}
+			}
+
+			visible.push_back(isOk);
+		}
+		visible.push_back(visible[0]);
+
+		if (isInside(poly, p))
+		{
+			int bestTriangleI = -1;
+			double maxArea = 0.0;
+
+			for (int i = 1; i < poly.size(); i++)
+			{
+				if (visible[i - 1] == 1 && visible[i] == 1)
+				{
+					int okTriangle = 1;
+					for (int j = 0; j < polyN; j++)
+					{
+						if (poly[j] != poly[i - 1] && poly[j] != poly[i])
+						{
+							if (isInside(poly[i - 1], poly[i], p, poly[j]))
+							{
+								okTriangle = 0;
+
+								break;
+							}
+						}
+					}
+
+					if (okTriangle == 1)
+					{
+						double myArea = area(p, poly[i - 1], poly[i]);
+
+						if (myArea > maxArea)
+						{
+							bestTriangleI = i;
+							maxArea = myArea;
+						}
+					}
+				}
+			}
+
+			if (bestTriangleI == -1)
+			{
+				return MAP_RANDPrivate(pointsCopy, rng);
+			}
+			else
+			{
+				poly.insert(poly.begin() + bestTriangleI, p);
+			}
+		}
+		else
+		{
+			int bestTriangleI = -1;
+			double minArea = 1.0e9;
+
+			for (int i = 1; i < poly.size(); i++)
+			{
+				if (visible[i - 1] == 1 && visible[i] == 1)
+				{
+					int okTriangle = 1;
+					for (int j = 0; j < polyN; j++)
+					{
+						if (poly[j] != poly[i - 1] && poly[j] != poly[i])
+						{
+							if (isInside(poly[i - 1], poly[i], p, poly[j]))
+							{
+								okTriangle = 0;
+
+								break;
+							}
+						}
+					}
+
+					if (okTriangle == 1)
+					{
+						double myArea = area(p, poly[i - 1], poly[i]);
+
+						if (myArea < minArea)
+						{
+							bestTriangleI = i;
+							minArea = myArea;
+						}
+					}
+				}
+			}
+
+			if (bestTriangleI == -1)
+			{
+				return MAP_RANDPrivate(pointsCopy, rng);
+			}
+			else
+			{
+				poly.insert(poly.begin() + bestTriangleI, p);
+			}
+		}
+
+		poly.pop_back();
+	}
+
+	return poly;
+}
+
+vector <Point> Algorithms::MAP_RAND(vector <Point> points, int q)
+{
+	//mt19937 rng(time(0));
+	mt19937 rng(47);
+
+	vector <Point> bestPolygon;
+	double bestArea = 1.0e9;
+
+	cout << "iter i =";
+	for (int i = 0; i < q; i++)
+	{
+		vector <Point> poly = MAP_RANDPrivate(points, rng);
+		double polyArea = abs(area(poly));
+
+		if (polyArea < bestArea)
+		{
+			bestArea = polyArea;
+			bestPolygon = poly;
+		}
+
+		cout << " " << i;
+	}
+	cout << "\n\n";
+
+	return bestPolygon;
+}
+
+vector <Point> Algorithms::MAP_RSA1(vector <Point> points, mt19937& rng)
+{
+	vector <pair<Point, int> > input; // {point, index}
+	vector <vector <int> > stripes = precalcPointsUnderStripe(points);
+	for (int i = 0; i < points.size(); i++)
+	{
+		input.push_back({ points[i], i });
+	}
+
+	vector <pair<Point, int> > res;
+
+	{// build initial triangle
+		int pos1;
+
+		pos1 = rng() % input.size();
+		res.push_back(input[pos1]);
+		input.erase(input.begin() + pos1);
+
+		Point p = res[0].first;
+
+		vector <pair<double, int> > inf;
+		for (int i = 0; i < input.size(); i++)
+		{
+			double _dist = dist(p, input[i].first);
+			inf.push_back({ _dist, i });
+		}
+
+		sort(inf.begin(), inf.end());
+
+		res.push_back(input[inf[0].second]);
+		res.push_back(input[inf[1].second]);
+
+		input.erase(input.begin() + max(inf[0].second, inf[1].second));
+		input.erase(input.begin() + min(inf[0].second, inf[1].second));
+	}
+	res.push_back(res[0]);
+
+	// start building possible triangles
+	vector <SegmentLinkedList> info(input.size());
+	for (int i = 0; i < input.size(); i++)
+	{
+		{
+			int pointsInside = pointsInsideTriangle(stripes, points, input[i].second, res[0].second, res[1].second);
+
+			if (pointsInside == 0 &&
+				!intersect(Segment(input[i].first, res[0].first), Segment(res[1].first, res[2].first)) &&
+				!intersect(Segment(input[i].first, res[1].first), Segment(res[0].first, res[2].first)))
+			{
+				info[i].add(Segment(res[0].first, res[1].first));
+			}
+		}
+
+		{
+			int pointsInside = pointsInsideTriangle(stripes, points, input[i].second, res[1].second, res[2].second);
+
+			if (pointsInside == 0 &&
+				!intersect(Segment(input[i].first, res[1].first), Segment(res[2].first, res[0].first)) &&
+				!intersect(Segment(input[i].first, res[2].first), Segment(res[1].first, res[0].first)))
+			{
+				info[i].add(Segment(res[1].first, res[2].first));
+			}
+		}
+
+		{
+			int pointsInside = pointsInsideTriangle(stripes, points, input[i].second, res[2].second, res[0].second);
+
+			if (pointsInside == 0 &&
+				!intersect(Segment(input[i].first, res[2].first), Segment(res[0].first, res[1].first)) &&
+				!intersect(Segment(input[i].first, res[0].first), Segment(res[2].first, res[1].first)))
+			{
+				info[i].add(Segment(res[2].first, res[0].first));
+			}
+		}
+	}
+
+	while (input.size() > 0)
+	{
+		double bestArea = 1.0e9;
+		double minDist = 1.0e9;
+		int bestPointI = -1;
+		Point bestPoint;
+		Segment bestSegment;
+
+		// find best edge
+		vector <int> feasiblePoints;
+		for (int i = 0; i < input.size(); i++)
+		{
+			if (info[i].last != -1)
+			{
+				double myDist = 1.0e9;
+
+				for (int j = 1; j < res.size(); j++)
+				{
+					myDist = min(myDist, distanceToSegment(Segment(res[j - 1].first, res[j].first), input[i].first));
+				}
+
+				if (myDist < minDist)
+				{
+					bestPointI = i;
+				}
+			}
+		}
+
+		if (bestPointI == -1)
+		{
+			return MAP_RSA1(points, rng);
+		}
+
+		{
+			int i = bestPointI;
+			int pointer = info[i].last;
+			while (pointer != -1)
+			{
+				double tArea = area(points[input[i].second], info[i].m[pointer].first.p1, info[i].m[pointer].first.p2);
+
+				if (tArea < bestArea)
+				{
+					bestArea = tArea;
+					bestPointI = i;
+					bestPoint = points[input[i].second];
+					bestSegment = info[i].m[pointer].first;
+				}
+
+				pointer = info[i].m[pointer].second.first;
+			}
+		}
+
+		if (bestArea > 1.0e8)
+		{
+			return MAP_RSA1(points, rng);
+		}
+
+		Point p1 = bestSegment.p1, p2 = bestPoint, p3 = bestSegment.p2;
+		int p1i, p2i = input[bestPointI].second, p3i;
+
+		// add new point to res
+		for (int i = 0; i < res.size() - 1; i++)
+		{
+			if (res[i].first == p1 && res[i + 1].first == p3)
+			{
+				p1i = res[i].second;
+				p3i = res[i + 1].second;
+				res.insert(res.begin() + i + 1, { bestPoint, p2i });
+
+				break;
+			}
+
+			if (res[i].first == p3 && res[i + 1].first == p1)
+			{
+				p3i = res[i].second;
+				p1i = res[i + 1].second;
+				res.insert(res.begin() + i + 1, { bestPoint, p2i });
+
+				break;
+			}
+		}
+
+		// erase triangles with deleted segment
+		for (int i = 0; i < info.size(); i++)
+		{
+			int pointer = info[i].last;
+			while (pointer != -1)
+			{
+				int nxt = info[i].m[pointer].second.first;
+
+				if ((info[i].m[pointer].first.p1 == p1 && info[i].m[pointer].first.p2 == p3) ||
+					(info[i].m[pointer].first.p1 == p3 && info[i].m[pointer].first.p2 == p1))
+				{
+					info[i].erase(pointer);
+				}
+
+				pointer = nxt;
+			}
+		}
+
+		// delete point
+		input.erase(input.begin() + bestPointI);
+		info.erase(info.begin() + bestPointI);
+
+		// delete unvalid triangles (intersecting new segments)
+		for (int i = 0; i < info.size(); i++)
+		{
+			int pointer = info[i].last;
+			while (pointer != -1)
+			{
+				int nxt = info[i].m[pointer].second.first;
+
+				if (p1 != info[i].m[pointer].first.p1 && p2 != info[i].m[pointer].first.p1 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p1), Segment(p1, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+				if (p1 != info[i].m[pointer].first.p2 && p2 != info[i].m[pointer].first.p2 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p2), Segment(p1, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+				if (p3 != info[i].m[pointer].first.p1 && p2 != info[i].m[pointer].first.p1 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p1), Segment(p3, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+				if (p3 != info[i].m[pointer].first.p2 && p2 != info[i].m[pointer].first.p2 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p2), Segment(p3, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+
+				pointer = nxt;
+			}
+		}
+
+		// clear deleted triangles
+		for (int i = 0; i < info.size(); i++)
+		{
+			info[i].clearInvalidSegments();
+		}
+
+		// check if new triangles are possible
+		for (int i = 0; i < input.size(); i++)
+		{
+			Point np1 = p1, np2 = input[i].first, np3 = p2;
+			int np1i = p1i, np2i = input[i].second, np3i = p2i;
+
+			int good = 1;
+
+			if (pointsInsideTriangle(stripes, points, np1i, np2i, np3i) != 0)
+			{
+				good = 0;
+			}
+
+			if (good != 1)
+			{
+				continue;
+			}
+
+			for (int j = 1; j < res.size(); j++)
+			{
+				if (np1 != res[j - 1].first && np1 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np1)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+				if (np3 != res[j - 1].first && np3 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np3)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+			}
+
+			if (good == 1)
+			{
+				info[i].add(Segment(np1, np3));
+			}
+		}
+		for (int i = 0; i < input.size(); i++)
+		{
+			Point np1 = p3, np2 = input[i].first, np3 = p2;
+			int np1i = p3i, np2i = input[i].second, np3i = p2i;
+
+			int good = 1;
+
+			if (pointsInsideTriangle(stripes, points, np1i, np2i, np3i) != 0)
+			{
+				good = 0;
+			}
+
+			if (good != 1)
+			{
+				continue;
+			}
+
+			for (int j = 1; j < res.size(); j++)
+			{
+				if (np1 != res[j - 1].first && np1 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np1)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+				if (np3 != res[j - 1].first && np3 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np3)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+			}
+
+			if (good == 1)
+			{
+				info[i].add(Segment(np1, np3));
+			}
+		}
+	}
+
+	vector <Point> _res;
+	res.pop_back();
+	for (auto it : res)
+	{
+		_res.push_back(it.first);
+	}
+
+	return _res;
+}
+
+vector <Point> Algorithms::MAP_RSA2(vector <Point> points, mt19937& rng)
+{
+	vector <pair<Point, int> > input; // {point, index}
+	vector <vector <int> > stripes = precalcPointsUnderStripe(points);
+	for (int i = 0; i < points.size(); i++)
+	{
+		input.push_back({ points[i], i });
+	}
+
+	vector <pair<Point, int> > res;
+
+	{// build initial triangle
+		int pos1;
+
+		pos1 = rng() % input.size();
+		res.push_back(input[pos1]);
+		input.erase(input.begin() + pos1);
+
+		Point p = res[0].first;
+
+		vector <pair<double, int> > inf;
+		for (int i = 0; i < input.size(); i++)
+		{
+			double _dist = dist(p, input[i].first);
+			inf.push_back({ _dist, i });
+		}
+
+		sort(inf.begin(), inf.end());
+
+		res.push_back(input[inf[0].second]);
+		res.push_back(input[inf[1].second]);
+
+		input.erase(input.begin() + max(inf[0].second, inf[1].second));
+		input.erase(input.begin() + min(inf[0].second, inf[1].second));
+	}
+	res.push_back(res[0]);
+
+	// start building possible triangles
+	vector <SegmentLinkedList> info(input.size());
+	for (int i = 0; i < input.size(); i++)
+	{
+		{
+			int pointsInside = pointsInsideTriangle(stripes, points, input[i].second, res[0].second, res[1].second);
+
+			if (pointsInside == 0 &&
+				!intersect(Segment(input[i].first, res[0].first), Segment(res[1].first, res[2].first)) &&
+				!intersect(Segment(input[i].first, res[1].first), Segment(res[0].first, res[2].first)))
+			{
+				info[i].add(Segment(res[0].first, res[1].first));
+			}
+		}
+
+		{
+			int pointsInside = pointsInsideTriangle(stripes, points, input[i].second, res[1].second, res[2].second);
+
+			if (pointsInside == 0 &&
+				!intersect(Segment(input[i].first, res[1].first), Segment(res[2].first, res[0].first)) &&
+				!intersect(Segment(input[i].first, res[2].first), Segment(res[1].first, res[0].first)))
+			{
+				info[i].add(Segment(res[1].first, res[2].first));
+			}
+		}
+
+		{
+			int pointsInside = pointsInsideTriangle(stripes, points, input[i].second, res[2].second, res[0].second);
+
+			if (pointsInside == 0 &&
+				!intersect(Segment(input[i].first, res[2].first), Segment(res[0].first, res[1].first)) &&
+				!intersect(Segment(input[i].first, res[0].first), Segment(res[2].first, res[1].first)))
+			{
+				info[i].add(Segment(res[2].first, res[0].first));
+			}
+		}
+	}
+
+	while (input.size() > 0)
+	{
+		double bestArea = 1.0e9;
+		int bestPointI = 0;
+		Point bestPoint;
+		Segment bestSegment;
+
+		// find best edge
+		vector <int> feasiblePoints;
+		for (int i = 0; i < input.size(); i++)
+		{
+			if (info[i].last != -1)
+			{
+				feasiblePoints.push_back(i);
+			}
+		}
+
+		if (feasiblePoints.size() == 0)
+		{
+			return MAP_RSA2(points, rng);
+		}
+
+		{
+			int i = rng() % feasiblePoints.size();
+			i = feasiblePoints[i];
+			int pointer = info[i].last;
+			while (pointer != -1)
+			{
+				double tArea = area(points[input[i].second], info[i].m[pointer].first.p1, info[i].m[pointer].first.p2);
+
+				if (tArea < bestArea)
+				{
+					bestArea = tArea;
+					bestPointI = i;
+					bestPoint = points[input[i].second];
+					bestSegment = info[i].m[pointer].first;
+				}
+
+				pointer = info[i].m[pointer].second.first;
+			}
+		}
+
+		if (bestArea > 1.0e8)
+		{
+			return MAP_RSA2(points, rng);
+		}
+
+		Point p1 = bestSegment.p1, p2 = bestPoint, p3 = bestSegment.p2;
+		int p1i, p2i = input[bestPointI].second, p3i;
+
+		// add new point to res
+		for (int i = 0; i < res.size() - 1; i++)
+		{
+			if (res[i].first == p1 && res[i + 1].first == p3)
+			{
+				p1i = res[i].second;
+				p3i = res[i + 1].second;
+				res.insert(res.begin() + i + 1, { bestPoint, p2i });
+
+				break;
+			}
+
+			if (res[i].first == p3 && res[i + 1].first == p1)
+			{
+				p3i = res[i].second;
+				p1i = res[i + 1].second;
+				res.insert(res.begin() + i + 1, { bestPoint, p2i });
+
+				break;
+			}
+		}
+
+		// erase triangles with deleted segment
+		for (int i = 0; i < info.size(); i++)
+		{
+			int pointer = info[i].last;
+			while (pointer != -1)
+			{
+				int nxt = info[i].m[pointer].second.first;
+
+				if ((info[i].m[pointer].first.p1 == p1 && info[i].m[pointer].first.p2 == p3) ||
+					(info[i].m[pointer].first.p1 == p3 && info[i].m[pointer].first.p2 == p1))
+				{
+					info[i].erase(pointer);
+				}
+
+				pointer = nxt;
+			}
+		}
+
+		// delete point
+		input.erase(input.begin() + bestPointI);
+		info.erase(info.begin() + bestPointI);
+
+		// delete unvalid triangles (intersecting new segments)
+		for (int i = 0; i < info.size(); i++)
+		{
+			int pointer = info[i].last;
+			while (pointer != -1)
+			{
+				int nxt = info[i].m[pointer].second.first;
+
+				if (p1 != info[i].m[pointer].first.p1 && p2 != info[i].m[pointer].first.p1 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p1), Segment(p1, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+				if (p1 != info[i].m[pointer].first.p2 && p2 != info[i].m[pointer].first.p2 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p2), Segment(p1, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+				if (p3 != info[i].m[pointer].first.p1 && p2 != info[i].m[pointer].first.p1 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p1), Segment(p3, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+				if (p3 != info[i].m[pointer].first.p2 && p2 != info[i].m[pointer].first.p2 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p2), Segment(p3, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+
+				pointer = nxt;
+			}
+		}
+
+		// clear deleted triangles
+		for (int i = 0; i < info.size(); i++)
+		{
+			info[i].clearInvalidSegments();
+		}
+
+		// check if new triangles are possible
+		for (int i = 0; i < input.size(); i++)
+		{
+			Point np1 = p1, np2 = input[i].first, np3 = p2;
+			int np1i = p1i, np2i = input[i].second, np3i = p2i;
+
+			int good = 1;
+
+			if (pointsInsideTriangle(stripes, points, np1i, np2i, np3i) != 0)
+			{
+				good = 0;
+			}
+
+			if (good != 1)
+			{
+				continue;
+			}
+
+			for (int j = 1; j < res.size(); j++)
+			{
+				if (np1 != res[j - 1].first && np1 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np1)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+				if (np3 != res[j - 1].first && np3 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np3)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+			}
+
+			if (good == 1)
+			{
+				info[i].add(Segment(np1, np3));
+			}
+		}
+		for (int i = 0; i < input.size(); i++)
+		{
+			Point np1 = p3, np2 = input[i].first, np3 = p2;
+			int np1i = p3i, np2i = input[i].second, np3i = p2i;
+
+			int good = 1;
+
+			if (pointsInsideTriangle(stripes, points, np1i, np2i, np3i) != 0)
+			{
+				good = 0;
+			}
+
+			if (good != 1)
+			{
+				continue;
+			}
+
+			for (int j = 1; j < res.size(); j++)
+			{
+				if (np1 != res[j - 1].first && np1 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np1)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+				if (np3 != res[j - 1].first && np3 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np3)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+			}
+
+			if (good == 1)
+			{
+				info[i].add(Segment(np1, np3));
+			}
+		}
+	}
+
+	vector <Point> _res;
+	res.pop_back();
+	for (auto it : res)
+	{
+		_res.push_back(it.first);
+	}
+
+	return _res;
+}
+
+vector <Point> Algorithms::MAP_RSA3(vector <Point> points, mt19937& rng)
+{
+	vector <pair<Point, int> > input; // {point, index}
+	vector <vector <int> > stripes = precalcPointsUnderStripe(points);
+	for (int i = 0; i < points.size(); i++)
+	{
+		input.push_back({ points[i], i });
+	}
+
+	vector <pair<Point, int> > res;
+
+	{// build initial triangle
+		int pos1;
+
+		pos1 = rng() % input.size();
+		res.push_back(input[pos1]);
+		input.erase(input.begin() + pos1);
+
+		Point p = res[0].first;
+
+		vector <pair<double, int> > inf;
+		for (int i = 0; i < input.size(); i++)
+		{
+			double _dist = dist(p, input[i].first);
+			inf.push_back({ _dist, i});
+		}
+
+		sort(inf.begin(), inf.end());
+
+		res.push_back(input[inf[0].second]);
+		res.push_back(input[inf[1].second]);
+
+		input.erase(input.begin() + max(inf[0].second, inf[1].second));
+		input.erase(input.begin() + min(inf[0].second, inf[1].second));
+	}
+	res.push_back(res[0]);
+
+	// start building possible triangles
+	vector <SegmentLinkedList> info(input.size());
+	for (int i = 0; i < input.size(); i++)
+	{
+		{
+			int pointsInside = pointsInsideTriangle(stripes, points, input[i].second, res[0].second, res[1].second);
+
+			if (pointsInside == 0 &&
+				!intersect(Segment(input[i].first, res[0].first), Segment(res[1].first, res[2].first)) &&
+				!intersect(Segment(input[i].first, res[1].first), Segment(res[0].first, res[2].first)))
+			{
+				info[i].add(Segment(res[0].first, res[1].first));
+			}
+		}
+
+		{
+			int pointsInside = pointsInsideTriangle(stripes, points, input[i].second, res[1].second, res[2].second);
+
+			if (pointsInside == 0 &&
+				!intersect(Segment(input[i].first, res[1].first), Segment(res[2].first, res[0].first)) &&
+				!intersect(Segment(input[i].first, res[2].first), Segment(res[1].first, res[0].first)))
+			{
+				info[i].add(Segment(res[1].first, res[2].first));
+			}
+		}
+
+		{
+			int pointsInside = pointsInsideTriangle(stripes, points, input[i].second, res[2].second, res[0].second);
+
+			if (pointsInside == 0 &&
+				!intersect(Segment(input[i].first, res[2].first), Segment(res[0].first, res[1].first)) &&
+				!intersect(Segment(input[i].first, res[0].first), Segment(res[2].first, res[1].first)))
+			{
+				info[i].add(Segment(res[2].first, res[0].first));
+			}
+		}
+	}
+
+	while (input.size() > 0)
+	{
+		double bestArea = 1.0e9;
+		int bestPointI = 0;
+		Point bestPoint;
+		Segment bestSegment;
+
+		// find best point
+		for (int i = 0; i < input.size(); i++)
+		{
+			int pointer = info[i].last;
+			while (pointer != -1)
+			{
+				double tArea = area(points[input[i].second], info[i].m[pointer].first.p1, info[i].m[pointer].first.p2);
+
+				if (tArea < bestArea)
+				{
+					bestArea = tArea;
+					bestPointI = i;
+					bestPoint = points[input[i].second];
+					bestSegment = info[i].m[pointer].first;
+				}
+
+				pointer = info[i].m[pointer].second.first;
+			}
+		}
+
+		if (bestArea > 1.0e8)
+		{
+			return MAP_RSA3(points, rng);
+		}
+
+		Point p1 = bestSegment.p1, p2 = bestPoint, p3 = bestSegment.p2;
+		int p1i, p2i = input[bestPointI].second, p3i;
+
+		// add new point to res
+		for (int i = 0; i < res.size() - 1; i++)
+		{
+			if (res[i].first == p1 && res[i + 1].first == p3)
+			{
+				p1i = res[i].second;
+				p3i = res[i + 1].second;
+				res.insert(res.begin() + i + 1, { bestPoint, p2i });
+
+				break;
+			}
+
+			if (res[i].first == p3 && res[i + 1].first == p1)
+			{
+				p3i = res[i].second;
+				p1i = res[i + 1].second;
+				res.insert(res.begin() + i + 1, { bestPoint, p2i });
+
+				break;
+			}
+		}
+
+		// erase triangles with deleted segment
+		for (int i = 0; i < info.size(); i++)
+		{
+			int pointer = info[i].last;
+			while (pointer != -1)
+			{
+				int nxt = info[i].m[pointer].second.first;
+
+				if ((info[i].m[pointer].first.p1 == p1 && info[i].m[pointer].first.p2 == p3) ||
+					(info[i].m[pointer].first.p1 == p3 && info[i].m[pointer].first.p2 == p1))
+				{
+					info[i].erase(pointer);
+				}
+
+				pointer = nxt;
+			}
+		}
+
+		// delete point
+		input.erase(input.begin() + bestPointI);
+		info.erase(info.begin() + bestPointI);
+
+		// delete unvalid triangles (intersecting new segments)
+		for (int i = 0; i < info.size(); i++)
+		{
+			int pointer = info[i].last;
+			while (pointer != -1)
+			{
+				int nxt = info[i].m[pointer].second.first;
+
+				if (p1 != info[i].m[pointer].first.p1 && p2 != info[i].m[pointer].first.p1 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p1), Segment(p1, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+				if (p1 != info[i].m[pointer].first.p2 && p2 != info[i].m[pointer].first.p2 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p2), Segment(p1, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+				if (p3 != info[i].m[pointer].first.p1 && p2 != info[i].m[pointer].first.p1 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p1), Segment(p3, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+				if (p3 != info[i].m[pointer].first.p2 && p2 != info[i].m[pointer].first.p2 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p2), Segment(p3, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+
+				pointer = nxt;
+			}
+		}
+
+		// clear deleted triangles
+		for (int i = 0; i < info.size(); i++)
+		{
+			info[i].clearInvalidSegments();
+		}
+
+		// check if new triangles are possible
+		for (int i = 0; i < input.size(); i++)
+		{
+			Point np1 = p1, np2 = input[i].first, np3 = p2;
+			int np1i = p1i, np2i = input[i].second, np3i = p2i;
+
+			int good = 1;
+
+			if (pointsInsideTriangle(stripes, points, np1i, np2i, np3i) != 0)
+			{
+				good = 0;
+			}
+
+			if (good != 1)
+			{
+				continue;
+			}
+
+			for (int j = 1; j < res.size(); j++)
+			{
+				if (np1 != res[j - 1].first && np1 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np1)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+				if (np3 != res[j - 1].first && np3 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np3)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+			}
+
+			if (good == 1)
+			{
+				info[i].add(Segment(np1, np3));
+			}
+		}
+		for (int i = 0; i < input.size(); i++)
+		{
+			Point np1 = p3, np2 = input[i].first, np3 = p2;
+			int np1i = p3i, np2i = input[i].second, np3i = p2i;
+
+			int good = 1;
+
+			if (pointsInsideTriangle(stripes, points, np1i, np2i, np3i) != 0)
+			{
+				good = 0;
+			}
+
+			if (good != 1)
+			{
+				continue;
+			}
+
+			for (int j = 1; j < res.size(); j++)
+			{
+				if (np1 != res[j - 1].first && np1 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np1)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+				if (np3 != res[j - 1].first && np3 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np3)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+			}
+
+			if (good == 1)
+			{
+				info[i].add(Segment(np1, np3));
+			}
+		}
+	}
+
+	vector <Point> _res;
+	res.pop_back();
+	for (auto it : res)
+	{
+		_res.push_back(it.first);
+	}
+
+	return _res;
+}
+
+vector <Point> Algorithms::MAP_RSA4(vector <Point> points, mt19937& rng)
+{
+	vector <pair<Point, int> > input; // {point, index}
+	vector <vector <int> > stripes = precalcPointsUnderStripe(points);
+	for (int i = 0; i < points.size(); i++)
+	{
+		input.push_back({ points[i], i });
+	}
+
+	vector <pair<Point, int> > res;
+
+	{// build initial triangle
+		int pos;
+
+		pos = rng() % input.size();
+		res.push_back(input[pos]);
+		input.erase(input.begin() + pos);
+
+		pos = rng() % input.size();
+		res.push_back(input[pos]);
+		input.erase(input.begin() + pos);
+
+		vector <int> okPoints;
+
+		for (int i = 0; i < input.size(); i++)
+		{
+			if (pointsInsideTriangle(stripes, points, res[0].second, res[1].second, input[i].second) == 0)
+			{
+				okPoints.push_back(i);
+			}
+		}
+		pos = rng() % okPoints.size();
+		pos = okPoints[pos];
+		res.push_back(input[pos]);
+		input.erase(input.begin() + pos);
+	}
+	res.push_back(res[0]);
+
+	// start building possible triangles
+	vector <SegmentLinkedList> info(input.size());
+	for (int i = 0; i < input.size(); i++)
+	{
+		{
+			int pointsInside = pointsInsideTriangle(stripes, points, input[i].second, res[0].second, res[1].second);
+
+			if (pointsInside == 0 &&
+				!intersect(Segment(input[i].first, res[0].first), Segment(res[1].first, res[2].first)) &&
+				!intersect(Segment(input[i].first, res[1].first), Segment(res[0].first, res[2].first)))
+			{
+				info[i].add(Segment(res[0].first, res[1].first));
+			}
+		}
+
+		{
+			int pointsInside = pointsInsideTriangle(stripes, points, input[i].second, res[1].second, res[2].second);
+
+			if (pointsInside == 0 &&
+				!intersect(Segment(input[i].first, res[1].first), Segment(res[2].first, res[0].first)) &&
+				!intersect(Segment(input[i].first, res[2].first), Segment(res[1].first, res[0].first)))
+			{
+				info[i].add(Segment(res[1].first, res[2].first));
+			}
+		}
+
+		{
+			int pointsInside = pointsInsideTriangle(stripes, points, input[i].second, res[2].second, res[0].second);
+
+			if (pointsInside == 0 &&
+				!intersect(Segment(input[i].first, res[2].first), Segment(res[0].first, res[1].first)) &&
+				!intersect(Segment(input[i].first, res[0].first), Segment(res[2].first, res[1].first)))
+			{
+				info[i].add(Segment(res[2].first, res[0].first));
+			}
+		}
+	}
+
+	while (input.size() > 0)
+	{
+		double bestArea = 1.0e9;
+		double minDist = 1.0e9;
+		int bestPointI = -1;
+		Point bestPoint;
+		Segment bestSegment;
+
+		// find best edge
+		vector <int> feasiblePoints;
+		for (int i = 0; i < input.size(); i++)
+		{
+			if (info[i].last != -1)
+			{
+				double myDist = 1.0e9;
+
+				for (int j = 1; j < res.size(); j++)
+				{
+					myDist = min(myDist, distanceToSegment(Segment(res[j - 1].first, res[j].first), input[i].first));
+				}
+
+				if (myDist < minDist)
+				{
+					bestPointI = i;
+				}
+			}
+		}
+
+		if (bestPointI == -1)
+		{
+			return MAP_RSA4(points, rng);
+		}
+
+		{
+			int i = bestPointI;
+			int pointer = info[i].last;
+			while (pointer != -1)
+			{
+				double tArea = area(points[input[i].second], info[i].m[pointer].first.p1, info[i].m[pointer].first.p2);
+
+				if (tArea < bestArea)
+				{
+					bestArea = tArea;
+					bestPointI = i;
+					bestPoint = points[input[i].second];
+					bestSegment = info[i].m[pointer].first;
+				}
+
+				pointer = info[i].m[pointer].second.first;
+			}
+		}
+
+		if (bestArea > 1.0e8)
+		{
+			return MAP_RSA4(points, rng);
+		}
+
+		Point p1 = bestSegment.p1, p2 = bestPoint, p3 = bestSegment.p2;
+		int p1i, p2i = input[bestPointI].second, p3i;
+
+		// add new point to res
+		for (int i = 0; i < res.size() - 1; i++)
+		{
+			if (res[i].first == p1 && res[i + 1].first == p3)
+			{
+				p1i = res[i].second;
+				p3i = res[i + 1].second;
+				res.insert(res.begin() + i + 1, { bestPoint, p2i });
+
+				break;
+			}
+
+			if (res[i].first == p3 && res[i + 1].first == p1)
+			{
+				p3i = res[i].second;
+				p1i = res[i + 1].second;
+				res.insert(res.begin() + i + 1, { bestPoint, p2i });
+
+				break;
+			}
+		}
+
+		// erase triangles with deleted segment
+		for (int i = 0; i < info.size(); i++)
+		{
+			int pointer = info[i].last;
+			while (pointer != -1)
+			{
+				int nxt = info[i].m[pointer].second.first;
+
+				if ((info[i].m[pointer].first.p1 == p1 && info[i].m[pointer].first.p2 == p3) ||
+					(info[i].m[pointer].first.p1 == p3 && info[i].m[pointer].first.p2 == p1))
+				{
+					info[i].erase(pointer);
+				}
+
+				pointer = nxt;
+			}
+		}
+
+		// delete point
+		input.erase(input.begin() + bestPointI);
+		info.erase(info.begin() + bestPointI);
+
+		// delete unvalid triangles (intersecting new segments)
+		for (int i = 0; i < info.size(); i++)
+		{
+			int pointer = info[i].last;
+			while (pointer != -1)
+			{
+				int nxt = info[i].m[pointer].second.first;
+
+				if (p1 != info[i].m[pointer].first.p1 && p2 != info[i].m[pointer].first.p1 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p1), Segment(p1, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+				if (p1 != info[i].m[pointer].first.p2 && p2 != info[i].m[pointer].first.p2 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p2), Segment(p1, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+				if (p3 != info[i].m[pointer].first.p1 && p2 != info[i].m[pointer].first.p1 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p1), Segment(p3, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+				if (p3 != info[i].m[pointer].first.p2 && p2 != info[i].m[pointer].first.p2 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p2), Segment(p3, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+
+				pointer = nxt;
+			}
+		}
+
+		// clear deleted triangles
+		for (int i = 0; i < info.size(); i++)
+		{
+			info[i].clearInvalidSegments();
+		}
+
+		// check if new triangles are possible
+		for (int i = 0; i < input.size(); i++)
+		{
+			Point np1 = p1, np2 = input[i].first, np3 = p2;
+			int np1i = p1i, np2i = input[i].second, np3i = p2i;
+
+			int good = 1;
+
+			if (pointsInsideTriangle(stripes, points, np1i, np2i, np3i) != 0)
+			{
+				good = 0;
+			}
+
+			if (good != 1)
+			{
+				continue;
+			}
+
+			for (int j = 1; j < res.size(); j++)
+			{
+				if (np1 != res[j - 1].first && np1 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np1)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+				if (np3 != res[j - 1].first && np3 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np3)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+			}
+
+			if (good == 1)
+			{
+				info[i].add(Segment(np1, np3));
+			}
+		}
+		for (int i = 0; i < input.size(); i++)
+		{
+			Point np1 = p3, np2 = input[i].first, np3 = p2;
+			int np1i = p3i, np2i = input[i].second, np3i = p2i;
+
+			int good = 1;
+
+			if (pointsInsideTriangle(stripes, points, np1i, np2i, np3i) != 0)
+			{
+				good = 0;
+			}
+
+			if (good != 1)
+			{
+				continue;
+			}
+
+			for (int j = 1; j < res.size(); j++)
+			{
+				if (np1 != res[j - 1].first && np1 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np1)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+				if (np3 != res[j - 1].first && np3 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np3)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+			}
+
+			if (good == 1)
+			{
+				info[i].add(Segment(np1, np3));
+			}
+		}
+	}
+
+	vector <Point> _res;
+	res.pop_back();
+	for (auto it : res)
+	{
+		_res.push_back(it.first);
+	}
+
+	return _res;
+}
+
+vector <Point> Algorithms::MAP_RSA5(vector <Point> points, mt19937& rng)
+{
+	vector <pair<Point, int> > input; // {point, index}
+	vector <vector <int> > stripes = precalcPointsUnderStripe(points);
+	for (int i = 0; i < points.size(); i++)
+	{
+		input.push_back({ points[i], i });
+	}
+
+	vector <pair<Point, int> > res;
+
+	{// build initial triangle
+		int pos;
+
+		pos = rng() % input.size();
+		res.push_back(input[pos]);
+		input.erase(input.begin() + pos);
+
+		pos = rng() % input.size();
+		res.push_back(input[pos]);
+		input.erase(input.begin() + pos);
+
+		vector <int> okPoints;
+
+		for (int i = 0; i < input.size(); i++)
+		{
+			if (pointsInsideTriangle(stripes, points, res[0].second, res[1].second, input[i].second) == 0)
+			{
+				okPoints.push_back(i);
+			}
+		}
+		pos = rng() % okPoints.size();
+		pos = okPoints[pos];
+		res.push_back(input[pos]);
+		input.erase(input.begin() + pos);
+	}
+	res.push_back(res[0]);
+
+	// start building possible triangles
+	vector <SegmentLinkedList> info(input.size());
+	for (int i = 0; i < input.size(); i++)
+	{
+		{
+			int pointsInside = pointsInsideTriangle(stripes, points, input[i].second, res[0].second, res[1].second);
+
+			if (pointsInside == 0 &&
+				!intersect(Segment(input[i].first, res[0].first), Segment(res[1].first, res[2].first)) &&
+				!intersect(Segment(input[i].first, res[1].first), Segment(res[0].first, res[2].first)))
+			{
+				info[i].add(Segment(res[0].first, res[1].first));
+			}
+		}
+
+		{
+			int pointsInside = pointsInsideTriangle(stripes, points, input[i].second, res[1].second, res[2].second);
+
+			if (pointsInside == 0 &&
+				!intersect(Segment(input[i].first, res[1].first), Segment(res[2].first, res[0].first)) &&
+				!intersect(Segment(input[i].first, res[2].first), Segment(res[1].first, res[0].first)))
+			{
+				info[i].add(Segment(res[1].first, res[2].first));
+			}
+		}
+
+		{
+			int pointsInside = pointsInsideTriangle(stripes, points, input[i].second, res[2].second, res[0].second);
+
+			if (pointsInside == 0 &&
+				!intersect(Segment(input[i].first, res[2].first), Segment(res[0].first, res[1].first)) &&
+				!intersect(Segment(input[i].first, res[0].first), Segment(res[2].first, res[1].first)))
+			{
+				info[i].add(Segment(res[2].first, res[0].first));
+			}
+		}
+	}
+
+	while (input.size() > 0)
+	{
+		double bestArea = 1.0e9;
+		int bestPointI = 0;
+		Point bestPoint;
+		Segment bestSegment;
+
+		// find best edge
+		vector <int> feasiblePoints;
+		for (int i = 0; i < input.size(); i++)
+		{
+			if (info[i].last != -1)
+			{
+				feasiblePoints.push_back(i);
+			}
+		}
+
+		if (feasiblePoints.size() == 0)
+		{
+			return MAP_RSA5(points, rng);
+		}
+
+		{
+			int i = rng() % feasiblePoints.size();
+			i = feasiblePoints[i];
+			int pointer = info[i].last;
+			while (pointer != -1)
+			{
+				double tArea = area(points[input[i].second], info[i].m[pointer].first.p1, info[i].m[pointer].first.p2);
+
+				if (tArea < bestArea)
+				{
+					bestArea = tArea;
+					bestPointI = i;
+					bestPoint = points[input[i].second];
+					bestSegment = info[i].m[pointer].first;
+				}
+
+				pointer = info[i].m[pointer].second.first;
+			}
+		}
+
+		if (bestArea > 1.0e8)
+		{
+			return MAP_RSA5(points, rng);
+		}
+
+		Point p1 = bestSegment.p1, p2 = bestPoint, p3 = bestSegment.p2;
+		int p1i, p2i = input[bestPointI].second, p3i;
+
+		// add new point to res
+		for (int i = 0; i < res.size() - 1; i++)
+		{
+			if (res[i].first == p1 && res[i + 1].first == p3)
+			{
+				p1i = res[i].second;
+				p3i = res[i + 1].second;
+				res.insert(res.begin() + i + 1, { bestPoint, p2i });
+
+				break;
+			}
+
+			if (res[i].first == p3 && res[i + 1].first == p1)
+			{
+				p3i = res[i].second;
+				p1i = res[i + 1].second;
+				res.insert(res.begin() + i + 1, { bestPoint, p2i });
+
+				break;
+			}
+		}
+
+		// erase triangles with deleted segment
+		for (int i = 0; i < info.size(); i++)
+		{
+			int pointer = info[i].last;
+			while (pointer != -1)
+			{
+				int nxt = info[i].m[pointer].second.first;
+
+				if ((info[i].m[pointer].first.p1 == p1 && info[i].m[pointer].first.p2 == p3) ||
+					(info[i].m[pointer].first.p1 == p3 && info[i].m[pointer].first.p2 == p1))
+				{
+					info[i].erase(pointer);
+				}
+
+				pointer = nxt;
+			}
+		}
+
+		// delete point
+		input.erase(input.begin() + bestPointI);
+		info.erase(info.begin() + bestPointI);
+
+		// delete unvalid triangles (intersecting new segments)
+		for (int i = 0; i < info.size(); i++)
+		{
+			int pointer = info[i].last;
+			while (pointer != -1)
+			{
+				int nxt = info[i].m[pointer].second.first;
+
+				if (p1 != info[i].m[pointer].first.p1 && p2 != info[i].m[pointer].first.p1 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p1), Segment(p1, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+				if (p1 != info[i].m[pointer].first.p2 && p2 != info[i].m[pointer].first.p2 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p2), Segment(p1, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+				if (p3 != info[i].m[pointer].first.p1 && p2 != info[i].m[pointer].first.p1 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p1), Segment(p3, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+				if (p3 != info[i].m[pointer].first.p2 && p2 != info[i].m[pointer].first.p2 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p2), Segment(p3, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+
+				pointer = nxt;
+			}
+		}
+
+		// clear deleted triangles
+		for (int i = 0; i < info.size(); i++)
+		{
+			info[i].clearInvalidSegments();
+		}
+
+		// check if new triangles are possible
+		for (int i = 0; i < input.size(); i++)
+		{
+			Point np1 = p1, np2 = input[i].first, np3 = p2;
+			int np1i = p1i, np2i = input[i].second, np3i = p2i;
+
+			int good = 1;
+
+			if (pointsInsideTriangle(stripes, points, np1i, np2i, np3i) != 0)
+			{
+				good = 0;
+			}
+
+			if (good != 1)
+			{
+				continue;
+			}
+
+			for (int j = 1; j < res.size(); j++)
+			{
+				if (np1 != res[j - 1].first && np1 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np1)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+				if (np3 != res[j - 1].first && np3 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np3)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+			}
+
+			if (good == 1)
+			{
+				info[i].add(Segment(np1, np3));
+			}
+		}
+		for (int i = 0; i < input.size(); i++)
+		{
+			Point np1 = p3, np2 = input[i].first, np3 = p2;
+			int np1i = p3i, np2i = input[i].second, np3i = p2i;
+
+			int good = 1;
+
+			if (pointsInsideTriangle(stripes, points, np1i, np2i, np3i) != 0)
+			{
+				good = 0;
+			}
+
+			if (good != 1)
+			{
+				continue;
+			}
+
+			for (int j = 1; j < res.size(); j++)
+			{
+				if (np1 != res[j - 1].first && np1 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np1)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+				if (np3 != res[j - 1].first && np3 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np3)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+			}
+
+			if (good == 1)
+			{
+				info[i].add(Segment(np1, np3));
+			}
+		}
+	}
+
+	vector <Point> _res;
+	res.pop_back();
+	for (auto it : res)
+	{
+		_res.push_back(it.first);
+	}
+
+	return _res;
+}
+
+vector <Point> Algorithms::MAP_RSA6(vector <Point> points, mt19937& rng)
+{
+	vector <pair<Point, int> > input; // {point, index}
+	vector <vector <int> > stripes = precalcPointsUnderStripe(points);
+	for (int i = 0; i < points.size(); i++)
+	{
+		input.push_back({ points[i], i });
+	}
+
+	vector <pair<Point, int> > res;
+
+	{// build initial triangle
+		int pos;
+
+		pos = rng() % input.size();
+		res.push_back(input[pos]);
+		input.erase(input.begin() + pos);
+
+		pos = rng() % input.size();
+		res.push_back(input[pos]);
+		input.erase(input.begin() + pos);
+
+		vector <int> okPoints;
+
+		for (int i = 0; i < input.size(); i++)
+		{
+			if (pointsInsideTriangle(stripes, points, res[0].second, res[1].second, input[i].second) == 0)
+			{
+				okPoints.push_back(i);
+			}
+		}
+		pos = rng() % okPoints.size();
+		pos = okPoints[pos];
+		res.push_back(input[pos]);
+		input.erase(input.begin() + pos);
+	}
+	res.push_back(res[0]);
+
+	// start building possible triangles
+	vector <SegmentLinkedList> info(input.size());
+	for (int i = 0; i < input.size(); i++)
+	{
+		{
+			int pointsInside = pointsInsideTriangle(stripes, points, input[i].second, res[0].second, res[1].second);
+
+			if (pointsInside == 0 &&
+				!intersect(Segment(input[i].first, res[0].first), Segment(res[1].first, res[2].first)) &&
+				!intersect(Segment(input[i].first, res[1].first), Segment(res[0].first, res[2].first)))
+			{
+				info[i].add(Segment(res[0].first, res[1].first));
+			}
+		}
+
+		{
+			int pointsInside = pointsInsideTriangle(stripes, points, input[i].second, res[1].second, res[2].second);
+
+			if (pointsInside == 0 &&
+				!intersect(Segment(input[i].first, res[1].first), Segment(res[2].first, res[0].first)) &&
+				!intersect(Segment(input[i].first, res[2].first), Segment(res[1].first, res[0].first)))
+			{
+				info[i].add(Segment(res[1].first, res[2].first));
+			}
+		}
+
+		{
+			int pointsInside = pointsInsideTriangle(stripes, points, input[i].second, res[2].second, res[0].second);
+
+			if (pointsInside == 0 &&
+				!intersect(Segment(input[i].first, res[2].first), Segment(res[0].first, res[1].first)) &&
+				!intersect(Segment(input[i].first, res[0].first), Segment(res[2].first, res[1].first)))
+			{
+				info[i].add(Segment(res[2].first, res[0].first));
+			}
+		}
+	}
+
+	while (input.size() > 0)
+	{
+		double bestArea = 1.0e9;
+		int bestPointI = 0;
+		Point bestPoint;
+		Segment bestSegment;
+
+		// find best point
+		for (int i = 0; i < input.size(); i++)
+		{
+			int pointer = info[i].last;
+			while (pointer != -1)
+			{
+				double tArea = area(points[input[i].second], info[i].m[pointer].first.p1, info[i].m[pointer].first.p2);
+
+				if (tArea < bestArea)
+				{
+					bestArea = tArea;
+					bestPointI = i;
+					bestPoint = points[input[i].second];
+					bestSegment = info[i].m[pointer].first;
+				}
+
+				pointer = info[i].m[pointer].second.first;
+			}
+		}
+
+		if (bestArea > 1.0e8)
+		{
+			return MAP_RSA6(points, rng);
+		}
+
+		Point p1 = bestSegment.p1, p2 = bestPoint, p3 = bestSegment.p2;
+		int p1i, p2i = input[bestPointI].second, p3i;
+
+		// add new point to res
+		for (int i = 0; i < res.size() - 1; i++)
+		{
+			if (res[i].first == p1 && res[i + 1].first == p3)
+			{
+				p1i = res[i].second;
+				p3i = res[i + 1].second;
+				res.insert(res.begin() + i + 1, { bestPoint, p2i });
+
+				break;
+			}
+
+			if (res[i].first == p3 && res[i + 1].first == p1)
+			{
+				p3i = res[i].second;
+				p1i = res[i + 1].second;
+				res.insert(res.begin() + i + 1, { bestPoint, p2i });
+
+				break;
+			}
+		}
+
+		// erase triangles with deleted segment
+		for (int i = 0; i < info.size(); i++)
+		{
+			int pointer = info[i].last;
+			while (pointer != -1)
+			{
+				int nxt = info[i].m[pointer].second.first;
+
+				if ((info[i].m[pointer].first.p1 == p1 && info[i].m[pointer].first.p2 == p3) ||
+					(info[i].m[pointer].first.p1 == p3 && info[i].m[pointer].first.p2 == p1))
+				{
+					info[i].erase(pointer);
+				}
+
+				pointer = nxt;
+			}
+		}
+
+		// delete point
+		input.erase(input.begin() + bestPointI);
+		info.erase(info.begin() + bestPointI);
+
+		// delete unvalid triangles (intersecting new segments)
+		for (int i = 0; i < info.size(); i++)
+		{
+			int pointer = info[i].last;
+			while (pointer != -1)
+			{
+				int nxt = info[i].m[pointer].second.first;
+
+				if (p1 != info[i].m[pointer].first.p1 && p2 != info[i].m[pointer].first.p1 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p1), Segment(p1, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+				if (p1 != info[i].m[pointer].first.p2 && p2 != info[i].m[pointer].first.p2 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p2), Segment(p1, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+				if (p3 != info[i].m[pointer].first.p1 && p2 != info[i].m[pointer].first.p1 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p1), Segment(p3, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+				if (p3 != info[i].m[pointer].first.p2 && p2 != info[i].m[pointer].first.p2 &&
+					intersect(Segment(input[i].first, info[i].m[pointer].first.p2), Segment(p3, p2)))
+				{
+					info[i].erase(pointer);
+					pointer = nxt;
+
+					continue;
+				}
+
+				pointer = nxt;
+			}
+		}
+
+		// clear deleted triangles
+		for (int i = 0; i < info.size(); i++)
+		{
+			info[i].clearInvalidSegments();
+		}
+
+		// check if new triangles are possible
+		for (int i = 0; i < input.size(); i++)
+		{
+			Point np1 = p1, np2 = input[i].first, np3 = p2;
+			int np1i = p1i, np2i = input[i].second, np3i = p2i;
+
+			int good = 1;
+
+			if (pointsInsideTriangle(stripes, points, np1i, np2i, np3i) != 0)
+			{
+				good = 0;
+			}
+
+			if (good != 1)
+			{
+				continue;
+			}
+
+			for (int j = 1; j < res.size(); j++)
+			{
+				if (np1 != res[j - 1].first && np1 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np1)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+				if (np3 != res[j - 1].first && np3 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np3)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+			}
+
+			if (good == 1)
+			{
+				info[i].add(Segment(np1, np3));
+			}
+		}
+		for (int i = 0; i < input.size(); i++)
+		{
+			Point np1 = p3, np2 = input[i].first, np3 = p2;
+			int np1i = p3i, np2i = input[i].second, np3i = p2i;
+
+			int good = 1;
+
+			if (pointsInsideTriangle(stripes, points, np1i, np2i, np3i) != 0)
+			{
+				good = 0;
+			}
+
+			if (good != 1)
+			{
+				continue;
+			}
+
+			for (int j = 1; j < res.size(); j++)
+			{
+				if (np1 != res[j - 1].first && np1 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np1)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+				if (np3 != res[j - 1].first && np3 != res[j].first)
+				{
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np3)) == true)
+					{
+						good = 0;
+
+						break;
+					}
+				}
+			}
+
+			if (good == 1)
+			{
+				info[i].add(Segment(np1, np3));
+			}
+		}
+	}
+
+	vector <Point> _res;
+	res.pop_back();
+	for (auto it : res)
+	{
+		_res.push_back(it.first);
+	}
+
+	return _res;
+}
+
+vector <Point> Algorithms::MAP_RS(vector <Point> points, int q)
+{
+	//mt19937 rng(time(0));
+	mt19937 rng(47);
+
+	vector <Point> bestPolygon;
+	double bestArea = 1.0e9;
+
+	cout << "iter i =";
+	for (int i = 0; i < q; i++)
+	{
+		vector <vector <Point> > polys;
+		vector <double> areas;
+		
+		polys.push_back(MAP_RSA1(points, rng));
+		areas.push_back(abs(area(polys.back())));
+
+		polys.push_back(MAP_RSA2(points, rng));
+		areas.push_back(abs(area(polys.back())));
+
+		polys.push_back(MAP_RSA3(points, rng));
+		areas.push_back(abs(area(polys.back())));
+
+		polys.push_back(MAP_RSA4(points, rng));
+		areas.push_back(abs(area(polys.back())));
+
+		polys.push_back(MAP_RSA5(points, rng));
+		areas.push_back(abs(area(polys.back())));
+
+		polys.push_back(MAP_RSA6(points, rng));
+		areas.push_back(abs(area(polys.back())));
+
+		for (int j = 0; j < polys.size(); j++)
+		{
+			if (polys[j].size() != 0)
+			{
+				if (areas[j] < bestArea)
+				{
+					bestArea = areas[j];
+					bestPolygon = polys[j];
+				}
+			}
+		}
+
+		cout << " " << i;
+	}
+	cout << "\n\n";
+
+	return bestPolygon;
+}
+
+vector <Point> Algorithms::MAP_Postprocess(vector <Point> points)
+{
+	points.push_back(points[0]);
+
+	int iterations = 0;
+
+	while (true)
+	{
+		iterations++;
+		int wasImproved = 0;
+
+		for (int pi = 1; pi + 1 < points.size(); pi++)
+		{
+			Point p = points[pi], p1 = points[pi - 1], p2 = points[pi + 1];
+
+			int canDelete = 1;
+
+			for (int j = 0; j < points.size(); j++)
+			{
+				if (points[j] != p && points[j] != p1 && points[j] != p2)
+				{
+					if (isInside(p, p1, p2, points[j]))
+					{
+						canDelete = 0;
+
+						break;
+					}
+				}
+			}
+
+			if (canDelete == 0)
+			{
+				continue;
+			}
+
+			for (int j = 1; j < points.size(); j++)
+			{
+				if (points[j - 1] != p1 && points[j] != p1 && points[j - 1] != p2 && points[j] != p2)
+				{
+					if (intersect(Segment(p1, p2), Segment(points[j - 1], points[j])))
+					{
+						canDelete = 0;
+
+						break;
+					}
+				}
+			}
+
+			if (canDelete == 0)
+			{
+				continue;
+			}
+
+			points.pop_back();
+			double oldArea = abs(area(points));
+			points.push_back(points[0]);
+
+			points.erase(points.begin() + pi);
+
+			vector <int> visible;
+			int polyN = points.size() - 1;
+
+			for (int i = 0; i < polyN; i++)
+			{
+				Segment s(p, points[i]);
+
+				int isOk = 1;
+
+				for (int j = 1; j <= polyN; j++)
+				{
+					if (points[j - 1] != s.p2 && points[j] != s.p2)
+					{
+						if (intersect(s, Segment(points[j - 1], points[j])))
+						{
+							isOk = 0;
+
+							break;
+						}
+					}
+				}
+
+				visible.push_back(isOk);
+			}
+			visible.push_back(visible[0]);
+
+			if (isInside(points, p))
+			{
+				int bestTriangleI = -1;
+				double maxArea = 0.0;
+
+				for (int i = 1; i < points.size(); i++)
+				{
+					if (visible[i - 1] == 1 && visible[i] == 1)
+					{
+						int okTriangle = 1;
+						for (int j = 0; j < polyN; j++)
+						{
+							if (points[j] != points[i - 1] && points[j] != points[i])
+							{
+								if (isInside(points[i - 1], points[i], p, points[j]))
+								{
+									okTriangle = 0;
+
+									break;
+								}
+							}
+						}
+
+						if (okTriangle == 1)
+						{
+							double myArea = area(p, points[i - 1], points[i]);
+
+							if (myArea > maxArea)
+							{
+								bestTriangleI = i;
+								maxArea = myArea;
+							}
+						}
+					}
+				}
+
+				points.insert(points.begin() + bestTriangleI, p);
+			}
+			else
+			{
+				int bestTriangleI = -1;
+				double minArea = 1.0e9;
+
+				for (int i = 1; i < points.size(); i++)
+				{
+					if (visible[i - 1] == 1 && visible[i] == 1)
+					{
+						int okTriangle = 1;
+						for (int j = 0; j < polyN; j++)
+						{
+							if (points[j] != points[i - 1] && points[j] != points[i])
+							{
+								if (isInside(points[i - 1], points[i], p, points[j]))
+								{
+									okTriangle = 0;
+
+									break;
+								}
+							}
+						}
+
+						if (okTriangle == 1)
+						{
+							double myArea = area(p, points[i - 1], points[i]);
+
+							if (myArea < minArea)
+							{
+								bestTriangleI = i;
+								minArea = myArea;
+							}
+						}
+					}
+				}
+
+				points.insert(points.begin() + bestTriangleI, p);
+			}
+
+			points.pop_back();
+			if (abs(area(points)) + 1.0e-5 < oldArea)
+			{
+				wasImproved = 1;
+			}
+			points.push_back(points[0]);
+		}
+
+		if (wasImproved == 0)
+		{
+			break;
+		}
+	}
+
+	cout << iterations << " iterations\n";
+
+	points.pop_back();
+	return points;
 }
