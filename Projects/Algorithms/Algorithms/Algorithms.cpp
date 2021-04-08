@@ -1626,7 +1626,7 @@ vector <Point> Algorithms::MAP_RAND(vector <Point> points, int q)
 	vector <Point> bestPolygon;
 	double bestArea = 1.0e9;
 
-	cout << "iter i =";
+	//cout << "iter i =";
 	for (int i = 0; i < q; i++)
 	{
 		vector <Point> poly = MAP_RANDPrivate(points, rng);
@@ -1638,9 +1638,9 @@ vector <Point> Algorithms::MAP_RAND(vector <Point> points, int q)
 			bestPolygon = poly;
 		}
 
-		cout << " " << i;
+		//cout << " " << i;
 	}
-	cout << "\n\n";
+	//cout << "\n\n";
 
 	return bestPolygon;
 }
@@ -3572,7 +3572,7 @@ vector <Point> Algorithms::MAP_RS(vector <Point> points, int q)
 	vector <Point> bestPolygon;
 	double bestArea = 1.0e9;
 
-	cout << "iter i =";
+	//cout << "iter i =";
 	for (int i = 0; i < q; i++)
 	{
 		vector <vector <Point> > polys;
@@ -3608,9 +3608,9 @@ vector <Point> Algorithms::MAP_RS(vector <Point> points, int q)
 			}
 		}
 
-		cout << " " << i;
+		//cout << " " << i;
 	}
-	cout << "\n\n";
+	//cout << "\n\n";
 
 	return bestPolygon;
 }
@@ -3791,7 +3791,7 @@ vector <Point> Algorithms::MAP_Postprocess(vector <Point> points)
 		}
 	}
 
-	cout << iterations << " iterations\n";
+	//cout << iterations << " iterations\n";
 
 	points.pop_back();
 	return points;
