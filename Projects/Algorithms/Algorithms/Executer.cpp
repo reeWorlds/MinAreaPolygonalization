@@ -460,6 +460,7 @@ void Executer::runMAP_Postprocess()
 void Executer::compareResults()
 {
 	vector <string> paths;
+	
 	paths.push_back("../../../Data/MAPDAC2/");
 	paths.push_back("../../../Data/MAPDAC/");
 	paths.push_back("../../../Data/MAPGreedy/");
@@ -483,6 +484,8 @@ void Executer::compareResults()
 
 	while (in >> name)
 	{
+		vector <double> areas;
+
 		cout << name << ":";
 
 		for (string path : paths)
@@ -500,8 +503,118 @@ void Executer::compareResults()
 			double area = abs(Algorithms::area(data));
 
 			cout << "\t" << area;
+
+			areas.push_back(area);
+		}
+
+		double min1 = min(min(areas[0], areas[1]), min(areas[2], areas[3]));
+		min1 = min(min1, areas[4]);
+		double min2 = min(min(areas[5], areas[6]), min(areas[7], areas[8]));
+		min2 = min(min2, areas[9]);
+
+		cout << "\t" << 100.0 - min2 / min1 * 100.0;
+
+		cout << "\n";
+	}
+}
+
+void Executer::showPostprocessingPersentage()
+{
+	vector <pair<string, string> > paths;
+	paths.push_back({ "../../../Data/MAPDAC2/", "../../../Data/Postprocess/MAPDAC2/" });
+	paths.push_back({ "../../../Data/MAPDAC/", "../../../Data/Postprocess/MAPDAC/" });
+	paths.push_back({ "../../../Data/MAPGreedy/", "../../../Data/Postprocess/MAPGreedy/" });
+	paths.push_back({ "../../../Data/MAP_RAND/", "../../../Data/Postprocess/MAP_RAND/" });
+	paths.push_back({ "../../../Data/MAP_RS/", "../../../Data/Postprocess/MAP_RS/" });
+
+	ifstream in("../../../Data/Generated/RECORDS.txt");
+	vector <string> names;
+	string _name;
+
+	while (in >> _name)
+	{
+		names.push_back(_name);
+	}
+
+	for (auto name : names)
+	{
+		cout << name << "\t";
+
+		for (auto path : paths)
+		{
+			ifstream in1(path.first + name);
+			ifstream in2(path.second + name);
+
+			vector <Point> poly1, poly2;
+			Point p;
+
+			while (in1 >> p.x >> p.y)
+			{
+				poly1.push_back(p);
+			}
+			while (in2 >> p.x >> p.y)
+			{
+				poly2.push_back(p);
+			}
+
+			double oldArea = abs(Algorithms::area(poly1)), newArea = abs(Algorithms::area(poly2));
+
+			cout << (newArea / oldArea) * 100.0 << "\t";
 		}
 
 		cout << "\n";
 	}
+}
+
+void Executer::forFigures1()
+{
+	vector <Point> poly;
+	Point p;
+
+	ifstream in("../../../Data/Temp/Test7Polygon.txt");
+
+	while (in >> p.x >> p.y)
+	{
+		poly.push_back(p);
+	}
+	in.close();
+
+	auto triag = Algorithms::triangulatePolygon(poly);
+
+	ofstream outData("../../../Data/Temp/Test7Triangulation.txt");
+	for (auto triangle : triag)
+	{
+		Point p1, p2, p3;
+
+		tie(p1, p2, p3) = triangle;
+
+		outData << p1.x << " " << p1.y << " " << p2.x << " " << p2.y << " " << p3.x << " " << p3.y << "\n";
+	}
+	outData.close();
+}
+
+void Executer::forFigures2()
+{
+	vector <Point> poly;
+	Point p;
+
+	ifstream in("../../../Data/Postprocess/MAPDAC2/5_square.txt");
+
+	while (in >> p.x >> p.y)
+	{
+		poly.push_back(p);
+	}
+
+	auto triag = Algorithms::triangulatePolygon(poly);
+
+	ofstream outData("../../../Data/Temp/Triangulation_5_square.txt");
+	for (auto triangle : triag)
+	{
+		Point p1, p2, p3;
+
+		tie(p1, p2, p3) = triangle;
+
+		outData << p1.x << " " << p1.y << " " << p2.x << " " << p2.y << " " << p3.x << " " << p3.y << "\n";
+	}
+	outData.close();
 }

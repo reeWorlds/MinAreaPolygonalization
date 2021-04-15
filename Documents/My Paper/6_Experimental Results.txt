@@ -1,0 +1,30 @@
+IV Experimental Results
+
+To test described algorithms and compare them with previously proposed algorithms we have implemented MAP_DAC2, MAP_DAC, MAP_Greedy, MAP_RAND, MAP_RS, and postprocessing. We write in C++ using the SFML library for a graphical interface (Fig. 2).
+There are 2 ways of specifying the data - reading points from the file and adding or deleting points via clicking on the drawing panel.
+
+To compare different algorithms 30 random point sets are generated. There are 3 types of point sets, each type consist of 10 sets of different sizes. The First 2 types are random points in rectangle and circle, named *_square.txt and *_circle.txt respectively. Points from the third type form a grid with some random shift from the exact position, named *_grid.txt. Different types are shown in Fig. 3.
+
+We ran all 5 algorithms on described point sets (Fig. 4 (a)-(e)). For randomized algorithms MAP_RAND and MAP_RS we set q=200 trials and take the best produced polygonalization.
+Table 1 shows the results. As MAP_Greedy was discovered to be incorrect, our implementation of this algorithm ignores points that are in the trap region. Cases with incorrect output polygonalization are noted with the asterisk.
+In 17 out of 30 cases the best result was computed by MAP_DAC2. In the other 13 cases, the best polygonalization was computed by MAP_RS. Regardless of MAP_RS can outperform MAP_DAC2 in terms of polygon area, MAP_RS is quite slow relative to MAP-DAC2 as their complexities are O(q*n^3) and O(n^2*log(n)) respectively.
+
+We also ran postprocessing on output from all algorithms on all point sets (Fig, 4 (f)). Table 2 shows areas of polygons after postprocessing in percentages relative to the area before postprocessing. We emphasize that postprocessing allows decreasing the area of solutions up to 10-25%.
+Table 3 shows results after postprocessing. The result is improved by 18.7% on average. MAP_DAC2_P outputs the best result in 17 cases, MAP_RS_P in 11 cases, and MAP_RAND_P in 2 cases. We apply postprocessing only to the best output of MAP_RS and MAP_RAND. It is expected to get even better results if postprocessing is applied after every trial of randomized algorithms.
+
+
+
+
+------------------------------------------
+
+Fig. 2. The interface of the developed program.
+
+Fig. 3. (a) 1_square.txt (b) 1_circle.txt (c) 1_grid.txt
+
+Fig. 4. Polygonalization of 5_square.txt (a) MAP_DAC2 (b) MAP_DAC (c) MAP_Greedy (d) MAP_RAND (e) MAP_RS (f) MAP_DAC2_P
+
+Table 1. Comparison of results obtained from MAP_DAC2, MAP_DAC, MAP_Greedy, MAP_RAND, MAP_RS.
+
+Table 2. Area of polygons after postprocessing relative to Table 1.
+
+Table 3. Postprocessing. Comparison of results obtained from MAP_DAC2_P, MAP_DAC_P, MAP_Greedy_P, MAP_RAND_P, MAP_RS_P.

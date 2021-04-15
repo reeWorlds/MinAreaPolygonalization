@@ -1,0 +1,10 @@
+V Conclusion
+
+In this paper, we present modification (MAP_DAC2) to the Divide and Conquer based algorithm for constructing an approximate solution of the MAP problem. The algorithm computes slightly more cases compared to the unmodified version but shows significant improvement in the polygon area. The complexity of the algorithm is O(n^2*log(n)) using O(n) memory.
+We also propose the algorithm for postprocessing output of other algorithms that improves local optimality via local rearrangements point by point. The complexity of postprocessing is O(n^2) using O(n) memory.
+
+We conduct experimental study to compare existing algorithms. MAP_DAC2 turns out to be competitive in terms of polygonalization area while working much faster than the best of existing algorithms.
+We also compare results before and after postprocessing. Postprocessing improved best polygonalizations by 18% on average which is an outstanding result.
+
+During the research of existing and new MAP algorithms, we considered 3 tactics - producing new polygonalization, postprocessing of polygonalization, and constructing new better polygonalizations via combining other polygonalizations.
+Producing new polygonalization is relatively well studied in the literature. We proposed the first MAP postprocessing technique in this paper. Polygon combining is left for future research. We believe that all 3 tactics deserve further investigation.

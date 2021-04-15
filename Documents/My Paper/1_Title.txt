@@ -1,0 +1,6 @@
+On Existing Min Area Polygonalization Algorithms And Possible Improvements
+Maksym Kovalchuk
+Faculty of Computer Sciences and Cybernetics
+Taras Shevchenko national university of Kyiv
+Kyiv, Ukraine
+max.koval4uk@ukr.net

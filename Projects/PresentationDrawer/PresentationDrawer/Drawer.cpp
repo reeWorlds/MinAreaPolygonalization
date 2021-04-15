@@ -119,10 +119,21 @@ void Drawer::processOpenButton(sf::RenderWindow& window)
 		insideArea.clear();
 		points = newPoints;
 
+		if (Algorithms::debug_isSimplePolygon(points) == true)
+		{
+			polygon = points;
+		}
+
 		updateScale();
 
 		lastMethod = "";
 		window.setTitle("Min Area Polygomalization");
+
+		if (polygon.size() != 0)
+		{
+			double area = abs(Algorithms::area(polygon));
+			window.setTitle("Min Area Polygonalization S = " + to_string(area));
+		}
 	}
 }
 

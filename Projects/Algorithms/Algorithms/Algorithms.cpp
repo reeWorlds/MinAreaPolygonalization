@@ -210,7 +210,7 @@ bool Algorithms::debug_isSimplePolygon(vector <Point> points)
 
 	if (s.size() != points.size())
 	{
-		cout << "Points repeat------------------------\n";
+		//cout << "Points repeat------------------------\n";
 
 		return false;
 	}
@@ -223,7 +223,7 @@ bool Algorithms::debug_isSimplePolygon(vector <Point> points)
 		{
 			if (intersect(Segment(points[i], points[i + 1]), Segment(points[j], points[j + 1])))
 			{
-				cout << "Segments intersect------------------------\n";
+				//cout << "Segments intersect------------------------\n";
 
 				return false;
 			}
@@ -828,7 +828,7 @@ vector <Point> Algorithms::MAPGreedy(vector <Point> points)
 
 		if (bestArea < -0.5)
 		{
-			cout << "Unable to connect all poits\n";
+			//cout << "Unable to connect all poits\n";
 
 			break;
 		}

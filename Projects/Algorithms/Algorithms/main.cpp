@@ -43,7 +43,12 @@ int main()
 	//Executer::runMAP_Postprocess();
 	//Executer::runTriangulationrunMAP_Postprocess();
 
-	Executer::compareResults();
+	//Executer::compareResults();
+
+	//Executer::showPostprocessingPersentage();
+	
+	//Executer::forFigures1();
+	Executer::forFigures2();
 
 	return 0;
 }

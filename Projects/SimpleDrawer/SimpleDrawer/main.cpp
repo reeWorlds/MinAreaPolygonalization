@@ -11,7 +11,7 @@ int main()
 	Drawer drawer;
 
 	/*
-	string name = "9_circle.txt";
+	string name = "5_square.txt";
 	drawer.readTriangles("../../../Data/Triangulation/Greedy/" + name, sf::Color::Green, sf::Color::Cyan);
 	drawer.readPoints("../../../Data/Generated/" + name, sf::Color::Black);
 	drawer.readShape("../../../Data/MAPGreedy/" + name, sf::Color::Blue);
@@ -19,14 +19,14 @@ int main()
 
 
 	/*
-	//drawer.readTriangles("../../../Data/Temp/Test5Triangles.txt", sf::Color::Green, sf::Color::Cyan);
-	drawer.readPoints("../../../Data/Temp/test8Points.txt", sf::Color::Blue);
-	drawer.readShape("../../../Data/Temp/test8Polygon.txt", sf::Color::Black);
+	drawer.readTriangles("../../../Data/Temp/Test7Triangulation.txt", sf::Color::Green, sf::Color::Cyan);
+	drawer.readPoints("../../../Data/Temp/test7Points.txt", sf::Color::Blue);
+	drawer.readShape("../../../Data/Temp/test7Polygon.txt", sf::Color::Black);
 	//*/
 
 
 	/*
-	string name = "1_square.txt";
+	string name = "5_square.txt";
 	drawer.readTriangles("../../../Data/Triangulation/DAC/" + name, sf::Color::Green, sf::Color::Cyan);
 	drawer.readPoints("../../../Data/Generated/" + name, sf::Color::Black);
 	drawer.readShape("../../../Data/MAPDAC/" + name, sf::Color::Blue);
@@ -34,7 +34,7 @@ int main()
 
 
 	/*
-	string name = "1_square.txt";
+	string name = "5_square.txt";
 	drawer.readTriangles("../../../Data/Triangulation/DAC2/" + name, sf::Color::Green, sf::Color::Cyan);
 	drawer.readPoints("../../../Data/Generated/" + name, sf::Color::Black);
 	drawer.readShape("../../../Data/MAPDAC2/" + name, sf::Color::Blue);
@@ -42,24 +42,23 @@ int main()
 
 
 	/*
-	string name = "0_grid.txt";
+	string name = "5_square.txt";
 	drawer.readTriangles("../../../Data/Triangulation/RAND/" + name, sf::Color::Green, sf::Color::Cyan);
 	drawer.readPoints("../../../Data/Generated/" + name, sf::Color::Black);
 	drawer.readShape("../../../Data/MAP_RAND/" + name, sf::Color::Blue);
 	//*/
 
 	/*
-	string name = "1_square.txt";
+	string name = "5_square.txt";
 	drawer.readTriangles("../../../Data/Triangulation/RS/" + name, sf::Color::Green, sf::Color::Cyan);
 	drawer.readPoints("../../../Data/Generated/" + name, sf::Color::Black);
 	drawer.readShape("../../../Data/MAP_RS/" + name, sf::Color::Blue);
 	//*/
 
 	//*
-	string name = "1_circle.txt";
-	//drawer.readTriangles("../../../Data/Triangulation/RS/" + name, sf::Color::Green, sf::Color::Cyan);
+	string name = "5_square.txt";
+	drawer.readTriangles("../../../Data/Temp/Triangulation_5_square.txt", sf::Color::Green, sf::Color::Cyan);
 	drawer.readPoints("../../../Data/Generated/" + name, sf::Color::Black);
-	//drawer.readShape("../../../Data/MAPDAC2/" + name, sf::Color::Blue);
 	drawer.readShape("../../../Data/Postprocess/MAPDAC2/" + name, sf::Color::Blue);
 	//*/
 

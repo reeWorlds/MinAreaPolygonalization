@@ -41,8 +41,6 @@ private:
 	static int pointsInsideTriangle(vector <vector <int> >& stripes, vector<Point>& points, int i, int j, int k);
 	static int debug_pointsInsideTriangle(vector <Point>& points, int i, int j, int k);
 
-	static bool debug_isSimplePolygon(vector <Point> points);
-
 	static vector <vector <Point> > splitBySplitVertex(vector <Point> points);
 	static vector <tuple<Point, Point, Point> > triangulateYMonotone(vector <Point> points);
 
@@ -66,6 +64,8 @@ public:
 
 	static double area(Point p1, Point p2, Point p3);
 	static double area(vector <Point> points);
+
+	static bool debug_isSimplePolygon(vector <Point> points);
 
 	static vector <Point> convexHull(vector <Point> points);
 

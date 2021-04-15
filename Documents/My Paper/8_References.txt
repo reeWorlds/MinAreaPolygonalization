@@ -1,0 +1,33 @@
+References
+1. M. F. Worboys, M. Duckham, “Monitoring qualitative spatiotemporal
+change for geosensor networks”, International Journal of Geographic
+Information Science 20(10), 2006, pp. 1087-1108. 
+2. A. Galton, “ Dynamic collectives and their collective dynamics”,
+COSIT 2005, LNCS, vol. 3693, pp. 300-315, 2005. 
+3. H. J. Miller, J. Han J., Eds, Geographic Data Mining and Knowledge
+Discovery, CRC Press, 2001.
+4. A.Galton, M. Duckham, “What is the region occupied by a set of
+points?”, GIScience 2006, LNCS, vol. 4197, pp. 81-98, 2006. 
+5. S. P. Fekete, On Simple Polygonalizations with Optimal Area,
+Discrete and Computational Geometry. Springer, 2000. 
+6. Subodh Kumar "Surface Triangulation: A Survey", July 3, 1996
+7. David Eppstein, Mark Overmars, Giinter Rote, and Gerhard Woeginger 
+"Finding Minimum Area k-gons", Discrete Comput Geom 7:45-58 (1992)
+8. V. Tereshchenko, V. Muravitskiy, Constructing a simple
+polygonalizations. Journal of World Academy of Science,
+Engineering and Technology (77), pp. 668-671, 2011.
+9. Sandor Fekete, Stephan Friedrichs, Michael Hemmer, Melanie Papenberg, Arne Schmidt,
+Julian Troegel "Area- and Boundary-Optimal Polygonalization of Planar Point Sets",
+EuroCG 2015, Ljubljana, Slovenia, March 16–18, 2015
+10. Sandor Fekete, Stephan Friedrichs, Michael Hemmer, Melanie Papenberg, Arne Schmidt,
+Julian Troegel, "Computing Area-Optimal Simple Polygonalizations",
+36th European Workshop on Computational Geometry, Würzburg, Germany, March 16–18, 2020
+11.Jiju Peethambaran, Amal Dev Parakkat, and Ramanathan Muthuganapathy. 2016. An empirical study on
+randomized optimal area polygonization of planar point sets. J. Exp. Algorithmics 21, 1, Article 1.10 (April 2016).
+12. Maria Teresa Taranilla, Edilma Olinda Gagliardi, and Gregorio Hern´andez Pe˜nalver,
+"Approaching Minimum Area Polygonization"
+13. Maksym Osiponok, Vasyl Tereshchenko,
+"The "Divide and Conquer" technique to solve the Minimum Area Polygonalization problem",
+IEEE ATIT 2019 ISBN 978-1-72-81-61-44-0/19/$31.00 2019 IEEE
+14. B.Joe, R.B. Simpson, Corrections to lee's visibility polygon
+algorithm. BIT Numerical Mathematics 27(4), pp. 458-473, 1987.

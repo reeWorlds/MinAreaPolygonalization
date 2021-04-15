@@ -1,0 +1,23 @@
+I. Introducing
+Computational Geometry plays important role in nowadays problemsolving. It offers various solutions for both deeply theoretical research and applied software.
+One type of problem is constructing different shapes optimizing parameters like perimeter and area.
+
+In this paper, we consider the problem of finding the minimal area polygon (MAP), vertices of which are all points from the given set.
+In practice, this problem arises in the context of geo-sensor networks [1,2], and GIS systems [3, 4].
+Like Traveling Salesman Problem, MAP is NP-hard, which was proven in [5]. It makes it almost impossible to solve the problem provably optimal for big enough data sets.
+Most related works focus on approximation of MAP, rather than finding the best possible polygonalization.
+
+Related works.
+The simplest algorithm for finding optimal MAP is MAP_PermuteAndReject with complexity O(n!). MAP_PermuteAndReject brute-force all permutations, each corresponding unique polygon, checks if the polygon is simple and takes one with minimal area.
+In [9, 10] MAP was formulated as the IP problem. Such an approach works faster than MAP_PermuteAndReject without losing optimality. MAP for 24 points was computed in about 90000 seconds [10].
+
+Algorithm MAP_Greedy proposed in [8]. The idea is to start with the convex hull of points and iteratively add feasible points that form maximal area triangle with edges of the previously computed polygon. The complexity of the algorithm is O(n^4) with O(n) memory usage or O(n^3) with O(n^2) memory usage.
+Algorithm MAP_DAC with complexity O(n^2) described in [13]. Authors on each step divide point set on 2 subsets, recursively solve the problem for smaller sets and merge found polygons with minimal area quadrilateral. If the subset of the points has less than 6 elements MAP_PermuteAndReject is used.
+Randomized algorithms were proposed in [11, 12]. MAP_RS [12] consist of 6 strategies how to choose the initial triangle, next point, and next edge. We believe that complexity of MAP_RS is O(q*n^3), where q is the number of trials and n is the number of points.
+MAP_RAND [11] starts with the triangle. On each step, it chooses a random point and connects it with the edge that minimizes the polygon area. MAP_RAND is the only algorithm that processes both inside the polygon and outside the polygon types of points.
+In [11] MAP_RAND described with O(n^2*log(n)) complexity, but we believe that complexity can be improved to O(n^2) using linear time polygon visibility algorithm [14].
+In [12] algorithm based on Ant Colony Optimization was proposed.
+
+The rest of this article is organized as follows. In Section II, we formulate the MAP problem, describe a modification to the MAP_DAC algorithm, and propose a simple postprocessing technique.
+In section III, we analyze the complexity of described algorithms and their correctness. In section IV, we present implementation details, a comparison of MAP_DAC2 with the existing approximation MAP algorithms, and results of postprocessing output of other algorithms.
+We present our conclusion in Section V.

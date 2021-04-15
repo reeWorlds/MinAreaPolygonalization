@@ -1,0 +1,6 @@
+Abstract.
+It was proven that Minimum Area Polygonalization (MAP) problem belongs to the NP-Hard set of problems. Therefore, different approximation algorithms were developed.
+In this paper, we suggest a modification to the recently proposed application of the "Divide And Conquer" technique to the MAP problem. Our algorithm computes slightly more cases and often outperforms other algorithms in terms of polygon area. The complexity of the modified algorithm is O(n^2*log(n)) using O(n) memory.
+We also introduce postprocessing technique. It takes solutions from other algorithms and makes local points rearrangement if it minimizes polygon area. The complexity of postprocessing is O(n^2) using O(n) memory.
+Experimental results indicate that it is expedient to use our algorithm in combination with postprocessing under time pressure. If no time pressure it is also useful to try randomized MAP algorithms in combination with postprocessing.
+Keywords: Computational Geometry, Minimum Area Polygonalization, Divide And Conquer, Postprocessing

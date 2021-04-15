@@ -31,4 +31,9 @@ public:
 	static void runMAP_Postprocess();
 
 	static void compareResults();
+
+	static void showPostprocessingPersentage();
+
+	static void forFigures1();
+	static void forFigures2();
 };

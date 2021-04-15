@@ -94,12 +94,14 @@ void Drawer::readTriangles(string path, sf::Color colorEdges, sf::Color colorIn)
 		y2 *= -1;
 		y3 *= -1;
 
+		/*
 		segments.push_back(Segment(x1, y1, x2, y2));
 		segmentsColor.push_back(colorEdges);
 		segments.push_back(Segment(x2, y2, x3, y3));
 		segmentsColor.push_back(colorEdges);
 		segments.push_back(Segment(x3, y3, x1, y1));
 		segmentsColor.push_back(colorEdges);
+		*/
 
 		vector <Point> shape;
 		shape.push_back(Point(x1, y1));

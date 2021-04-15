@@ -1,0 +1,44 @@
+III Complexity And Correctness
+
+a) Complexity
+Theorem 1. 
+Algorithm MAP_DAC2 can be implemented with complexity O(n^2*log(n)).
+Proof.
+MAP_DAC2 is recursive algorithm. During the one iteration, it sorts out points twice, calls merging function 8 times, and calls itself recursively 4 times with 2 times smaller point set.
+Complexity of sorting is O(n*log(n)). Complexity of merging function is O(n^2) [13]. That is we have reccurence T(n) = 4*T(n/2) + 8*O(n^2) + 2*O(n*log(n)).
+After simplification we get T(n) = 4*T(n/2) + O(n^2). Last recurrence can be solved using Master Theorem and the solution is O(n^2*log(n)).
+
+Theorem 2.
+Postprocessing can be implemented with complexity O(n^2).
+Proof.
+We can check (*) and (**) as described above in O(n) time. The complexity of the windmill algorithm is also O(n). If while checking (**) visibility polygon already constructed then we can find edge (P_j-1, P_j) of step 4 with complexity O(n).
+Therefore, we can process one point in O(n) time. We need to process n points which lead to overall complexity O(n^2).
+
+In practice, we ran postprocessing several times until the polygon area converge. During the experimental study, maximal number of postprocessing trials was 10. We believe that running postprocessing until area converges also has O(n^2) complexity.
+
+b) Correctness of MAP_DAC2
+Correctness of MAP_DAC2 consists in the existence of quadrilateral merging 2 polygons on steps 4 and 9. MAP_DAC2 tries to merge 4 pairs of polygons on both step 4 and step 9.
+During the experimental study, we found pairs that cannot be merged as such a quadrilateral do not exist. Despite it, at least one of 4 pairs always could be combined when running MAP_DAC2 on our data set. We don`t know whether it holds in the general case.
+In the implementation we assign infinity area to the incorrect polygonalization, leading the algorithm to choose one with a smaller area.
+In case the algorithm approved to be incorrect in general we suggest running several trials with randomly rotated input points.
+
+c) Correctness of postprocessing
+Trap region of polygon P is the area of the plane from which no edges of P are completely visible (Fig. 1). Concept of trap region introduced in [11].
+Therefore, for the algorithm to be correct it is necessary to not lead input points into the trap region or somehow deal with the trap region otherwise.
+[11] propose to ran MAP_RAND with different random seeds in case of some point in the trap region. The same can be done in MAP_RS. So, we can consider randomized algorithms to be correct.
+During the experimental study, MAP_Greedy fell into the trap region several times. Because MAP_Greedy described in [8] is a deterministic algorithm, we claim it to be incorrect in the general case.
+
+Theorem 3.
+The postprocessing algorithm never throws removed points into the trap region of P'. The postprocessing algorithm either improves the area of the given polygon or does not change it.
+Proof.
+For every point there possible 3 distinct cases.
+(+). At least one of (*) or (**) does not hold and the point is not removed;
+(++). Point is removed and added such that old and new values of P are the same;
+(+++). Point is removed and added such that old and new values of P are not the same.
+
+In case (+), we do not remove points, therefore correctness is held. Otherwise (cases (++), (+++)) point is removed. In case (+++) not only correctness is held but area is improved.
+If both (+) and (+++) are not met then from (+) we have garantee of (**). That is, edge (P_i-1, P_i+1) of P' is visible from P_i. So, removed point P_i is not in the trap region but overall area remains the same as before (case (++)).
+
+
+------------------------
+Fig, 1. Red point is inside the trap region. (a) point inside the polygon. (b) point outside the polygon
