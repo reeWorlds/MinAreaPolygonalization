@@ -41,4 +41,4 @@ If both (+) and (+++) are not met then from (+) we have garantee of (**). That i
 
 
 ------------------------
-Fig, 1. Red point is inside the trap region. (a) point inside the polygon. (b) point outside the polygon
+Fig. 1. Red point is inside the trap region. (a) point inside the polygon. (b) point outside the polygon

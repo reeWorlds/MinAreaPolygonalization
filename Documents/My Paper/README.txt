@@ -1,0 +1,1 @@
+This folder contains figures, tables and draft text for each section.
