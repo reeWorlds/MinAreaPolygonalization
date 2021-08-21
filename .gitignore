@@ -49,3 +49,5 @@
 *.ipdb
 *.enc
 *.FileListAbsolute.txt
+Banned/*
+**/x64/**

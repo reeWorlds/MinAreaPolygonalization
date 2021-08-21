@@ -36,4 +36,6 @@ public:
 
 	static void forFigures1();
 	static void forFigures2();
+
+	static void forFigure1_real();
 };

@@ -48,7 +48,9 @@ int main()
 	//Executer::showPostprocessingPersentage();
 	
 	//Executer::forFigures1();
-	Executer::forFigures2();
+	//Executer::forFigures2();
+
+	Executer::forFigure1_real();
 
 	return 0;
 }

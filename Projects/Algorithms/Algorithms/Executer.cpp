@@ -618,3 +618,100 @@ void Executer::forFigures2()
 	}
 	outData.close();
 }
+
+void Executer::forFigure1_real()
+{
+	if (false)
+	{
+		ifstream in("ForFig1.txt");
+
+		Point p;
+		vector <Point> points;
+
+		while (in >> p.x >> p.y)
+		{
+			points.push_back(p);
+		}
+
+		vector <Point> dac2 = Algorithms::MAPDAC2(points); // some extra code in mergeDAC
+	}
+	else
+	{
+		string ts;
+		ifstream in("Fig1Info.txt");
+
+		for (int i = 0; i < 8; i++)
+		{
+			Point tp;
+			vector <Point> p1, p2, quad;
+
+			for (int j = 0; j < 22; j++)
+			{
+				in >> tp.x >> tp.y;
+
+				p1.push_back(tp);
+			}
+
+			for (int j = 0; j < 22; j++)
+			{
+				in >> tp.x >> tp.y;
+
+				p2.push_back(tp);
+			}
+
+			for (int j = 0; j < 4; j++)
+			{
+				in >> tp.x >> tp.y;
+
+				quad.push_back(tp);
+			}
+
+			in >> ts;
+
+			ofstream outAP("polyA" + to_string(i) + ".txt");
+			ofstream outAT("trigA" + to_string(i) + ".txt");
+			ofstream outBP("polyB" + to_string(i) + ".txt");
+			ofstream outBT("trigB" + to_string(i) + ".txt");
+			ofstream outQ("trigQ" + to_string(i) + ".txt");
+
+			vector <tuple<Point, Point, Point> > t1 = Algorithms::triangulatePolygon(p1);
+			vector <tuple<Point, Point, Point> > t2 = Algorithms::triangulatePolygon(p2);
+			vector <tuple<Point, Point, Point> > q = Algorithms::triangulatePolygon(quad);
+
+			for (auto it : p1)
+			{
+				outAP << it.x << " " << it.y << "\n";
+			}
+			for (auto triangle : t1)
+			{
+				Point p1, p2, p3;
+
+				tie(p1, p2, p3) = triangle;
+
+				outAT << p1.x << " " << p1.y << " " << p2.x << " " << p2.y << " " << p3.x << " " << p3.y << "\n";
+			}
+
+			for (auto it : p2)
+			{
+				outBP << it.x << " " << it.y << "\n";
+			}
+			for (auto triangle : t2)
+			{
+				Point p1, p2, p3;
+
+				tie(p1, p2, p3) = triangle;
+
+				outBT << p1.x << " " << p1.y << " " << p2.x << " " << p2.y << " " << p3.x << " " << p3.y << "\n";
+			}
+
+			for (auto triangle : q)
+			{
+				Point p1, p2, p3;
+
+				tie(p1, p2, p3) = triangle;
+
+				outQ << p1.x << " " << p1.y << " " << p2.x << " " << p2.y << " " << p3.x << " " << p3.y << "\n";
+			}
+		}
+	}
+}

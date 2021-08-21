@@ -27,7 +27,7 @@ bool Algorithms::intersect(Segment s1, Segment s2)
 
 	int rotation3 = rotationType(s2.p2 - s2.p1, s1.p1 - s2.p2);
 	int rotation4 = rotationType(s2.p2 - s2.p1, s1.p2 - s2.p2);
-	
+
 	if (rotation1 != rotation2 && rotation3 != rotation4)
 	{
 		return true;
@@ -45,7 +45,7 @@ double Algorithms::dist(Point p1, Point p2)
 
 double Algorithms::distanceToSegment(Segment s, Point p)
 {
-	double dist = min(sqrt((s.p1.x - p.x)*(s.p1.x - p.x) + (s.p1.y - p.y)*(s.p1.y - p.y)),
+	double dist = min(sqrt((s.p1.x - p.x) * (s.p1.x - p.x) + (s.p1.y - p.y) * (s.p1.y - p.y)),
 		sqrt((s.p2.x - p.x) * (s.p2.x - p.x) + (s.p2.y - p.y) * (s.p2.y - p.y)));
 
 	if (abs(angle(Point(s.p2.x - s.p1.x, s.p2.y - s.p1.y), Point(p.x - s.p2.x, p.y - s.p2.y))) > M_PI / 2.0 &&
@@ -219,13 +219,17 @@ bool Algorithms::debug_isSimplePolygon(vector <Point> points)
 
 	for (int i = 0; i < points.size() - 1; i++)
 	{
-		for (int j = i + 2; j < points.size() - 2; j++)
+		for (int j = i + 2; j < points.size() - 1; j++)
 		{
-			if (intersect(Segment(points[i], points[i + 1]), Segment(points[j], points[j + 1])))
+			if (points[i] != points[j] && points[i] != points[j + 1]
+				&& points[i + 1] != points[j] && points[i] != points[j + 1])
 			{
-				//cout << "Segments intersect------------------------\n";
+				if (intersect(Segment(points[i], points[i + 1]), Segment(points[j], points[j + 1])))
+				{
+					//cout << "Segments intersect------------------------\n";
 
-				return false;
+					return false;
+				}
 			}
 		}
 	}
@@ -434,11 +438,11 @@ vector <vector <Point> > Algorithms::splitBySplitVertex(vector <Point> points)
 	int maxAreaI = 0;
 	for (int i = 0; i < faces.size(); i++)
 	{
-		double myArea = area(faces[i]);
+		double myArea = faces[i].size();
 
 		if (myArea > maxArea)
 		{
-			myArea = maxArea;
+			maxArea = myArea;
 			maxAreaI = i;
 		}
 	}
@@ -452,7 +456,7 @@ vector <tuple<Point, Point, Point> > Algorithms::triangulateYMonotone(vector <Po
 	{
 		// check for the counterclockwise order
 		int n = points.size();
-		
+
 		points.push_back(points[0]);
 		points.push_back(points[1]);
 
@@ -848,7 +852,7 @@ vector <Point> Algorithms::MAPGreedy(vector <Point> points)
 				break;
 			}
 
-			if(res[i].first == p3 && res[i + 1].first == p1)
+			if (res[i].first == p3 && res[i + 1].first == p1)
 			{
 				p3i = res[i].second;
 				p1i = res[i + 1].second;
@@ -866,7 +870,7 @@ vector <Point> Algorithms::MAPGreedy(vector <Point> points)
 			{
 				int nxt = info[i].m[pointer].second.first;
 
-				if ( (info[i].m[pointer].first.p1 == p1 && info[i].m[pointer].first.p2 == p3) ||
+				if ((info[i].m[pointer].first.p1 == p1 && info[i].m[pointer].first.p2 == p3) ||
 					(info[i].m[pointer].first.p1 == p3 && info[i].m[pointer].first.p2 == p1))
 				{
 					info[i].erase(pointer);
@@ -929,7 +933,7 @@ vector <Point> Algorithms::MAPGreedy(vector <Point> points)
 		for (int i = 0; i < info.size(); i++)
 		{
 			info[i].clearInvalidSegments();
-		}		
+		}
 
 		// check if new triangles are possible
 		for (int i = 0; i < input.size(); i++)
@@ -953,7 +957,7 @@ vector <Point> Algorithms::MAPGreedy(vector <Point> points)
 			{
 				if (np1 != res[j - 1].first && np1 != res[j].first)
 				{
-					if (intersect(Segment(res[j-1].first, res[j].first), Segment(np2, np1)) == true)
+					if (intersect(Segment(res[j - 1].first, res[j].first), Segment(np2, np1)) == true)
 					{
 						good = 0;
 
@@ -1118,7 +1122,7 @@ vector <Point> Algorithms::MAPPermuteReject(vector <Point> points)
 
 		next_permutation(points.begin() + 1, --points.end());
 	}
-	
+
 	bestPolygon.pop_back();
 	return bestPolygon;
 }
@@ -1471,7 +1475,7 @@ vector <Point> Algorithms::MAP_RANDPrivate(vector <Point> points, mt19937& rng)
 	vector <Point> pointsCopy = points;
 
 	vector <Point> poly;
-	
+
 	{// initial triangle
 		int i;
 
@@ -2321,7 +2325,7 @@ vector <Point> Algorithms::MAP_RSA3(vector <Point> points, mt19937& rng)
 		for (int i = 0; i < input.size(); i++)
 		{
 			double _dist = dist(p, input[i].first);
-			inf.push_back({ _dist, i});
+			inf.push_back({ _dist, i });
 		}
 
 		sort(inf.begin(), inf.end());
@@ -3577,7 +3581,7 @@ vector <Point> Algorithms::MAP_RS(vector <Point> points, int q)
 	{
 		vector <vector <Point> > polys;
 		vector <double> areas;
-		
+
 		polys.push_back(MAP_RSA1(points, rng));
 		areas.push_back(abs(area(polys.back())));
 
