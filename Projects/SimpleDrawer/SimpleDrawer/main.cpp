@@ -62,7 +62,7 @@ int main()
 	drawer.readShape("../../../Data/Postprocess/MAPDAC2/" + name, sf::Color::Blue);
 	//*/
 
-	//*
+	/*
 	string name = "7";
 	drawer.readTriangles("Data/Fig1/trigA" + name + ".txt", sf::Color::Green, sf::Color::Cyan);
 	drawer.readTriangles("Data/Fig1/trigB" + name + ".txt", sf::Color::Green, sf::Color::Cyan);
@@ -71,7 +71,12 @@ int main()
 	drawer.readPoints("Data/Fig1/polyB" + name + ".txt", sf::Color::Black);
 	drawer.readShape("Data/Fig1/polyA" + name + ".txt", sf::Color::Blue);
 	drawer.readShape("Data/Fig1/polyB" + name + ".txt", sf::Color::Blue);
+	//*/
 
+	//*
+	drawer.readTriangles("../../../Data/TempFig2/3triag.txt", sf::Color::Green, sf::Color::Cyan);
+	drawer.readPoints("../../../Data/TempFig2/points.txt", sf::Color::Black);
+	drawer.readShape("../../../Data/TempFig2/3.txt", sf::Color::Blue);
 	//*/
 
 	drawer.show();

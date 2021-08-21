@@ -3632,6 +3632,11 @@ vector <Point> Algorithms::MAP_Postprocess(vector <Point> points)
 
 		for (int pi = 1; pi + 1 < points.size(); pi++)
 		{
+			if (wasImproved == 1)// delete
+			{
+				break;
+			}
+
 			Point p = points[pi], p1 = points[pi - 1], p2 = points[pi + 1];
 
 			int canDelete = 1;
@@ -3793,6 +3798,9 @@ vector <Point> Algorithms::MAP_Postprocess(vector <Point> points)
 		{
 			break;
 		}
+
+		// delete
+		break;
 	}
 
 	//cout << iterations << " iterations\n";

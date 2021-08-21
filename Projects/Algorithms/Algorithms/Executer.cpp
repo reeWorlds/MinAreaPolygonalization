@@ -715,3 +715,74 @@ void Executer::forFigure1_real()
 		}
 	}
 }
+
+void Executer::forFigure2_real()
+{
+	if (false)
+	{
+		mt19937 tRng(4234);
+		vector <Point> points;
+
+		for (int i = 0; i < 10; i++)
+		{
+			points.push_back(Point(tRng() % 25 + 5, tRng() % 50 + 5));
+		}
+
+		ofstream out("../../../Data/TempFig2/points.txt");
+		for(auto p : points)
+		{
+			out << p.x << " " << p.y << "\n";
+		}
+		out.close();
+
+		vector <Point> dac = Algorithms::MAPDAC(points);
+		double dacA = abs(Algorithms::area(dac));
+
+		out.open("../../../Data/TempFig2/poly.txt");
+		for (auto p : dac)
+		{
+			out << p.x << " " << p.y << "\n";
+		}
+		out.close();
+
+		vector <Point> pdac = Algorithms::MAP_Postprocess(dac);
+		double pdacA = abs(Algorithms::area(pdac));
+
+		out.open("../../../Data/TempFig2/optim.txt");
+		for (auto p : pdac)
+		{
+			out << p.x << " " << p.y << "\n";
+		}
+		out.close();
+
+		cout << dacA << " " << pdacA << "\n";
+	}
+	else
+	{
+		for (int st = 1; st <= 2; st++)
+		{
+			Point p;
+			vector <Point> points;
+			
+			ifstream in("../../../Data/TempFig2/" + to_string(st) + ".txt");
+			while (in >> p.x >> p.y)
+			{
+				points.push_back(p);
+			}
+			in.close();
+
+			vector <tuple<Point, Point, Point> > t = Algorithms::triangulatePolygon(points);
+
+			ofstream out("../../../Data/TempFig2/" + to_string(st) + "triag.txt");
+			for (auto triangle : t)
+			{
+				Point p1, p2, p3;
+
+				tie(p1, p2, p3) = triangle;
+
+				out << p1.x << " " << p1.y << " " << p2.x << " " << p2.y << " " << p3.x << " " << p3.y << "\n";
+			}
+			out.close();
+		}
+	}
+}

@@ -50,7 +50,8 @@ int main()
 	//Executer::forFigures1();
 	//Executer::forFigures2();
 
-	Executer::forFigure1_real();
+	//Executer::forFigure1_real();
+	Executer::forFigure2_real();
 
 	return 0;
 }

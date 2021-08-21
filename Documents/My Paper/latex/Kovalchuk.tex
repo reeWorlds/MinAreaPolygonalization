@@ -144,73 +144,73 @@
 			8 polygons considered on steps 4 and 8 are shown in Fig. \ref{fig1}.
 			
 			\begin{figure}[htbp]
-			\centering
-			\begin{subfigure}{0.45\linewidth}
 				\centering
-				\includegraphics[width=0.99\textwidth]{fig1a.png}
-				\caption{}
-				\label{fig1a}
-			\end{subfigure}
-			\begin{subfigure}{0.45\linewidth}
-				\centering
-				\includegraphics[width=0.99\textwidth]{fig1b.png}
-				\caption{}
-				\label{fig1b}
-			\end{subfigure}
-			
-			\begin{subfigure}{0.45\linewidth}
-				\centering
-				\includegraphics[width=0.99\textwidth]{fig1c.png}
-				\caption{}
-				\label{fig1c}
-			\end{subfigure}
-			\begin{subfigure}{0.45\linewidth}
-				\centering
-				\includegraphics[width=0.99\textwidth]{fig1d.png}
-				\caption{}
-				\label{fig1d}
-			\end{subfigure}
-			
-			\begin{subfigure}{0.45\linewidth}
-				\centering
-				\includegraphics[width=0.99\textwidth]{fig1e.png}
-				\caption{}
-				\label{fig1e}
-			\end{subfigure}
-			\begin{subfigure}{0.45\linewidth}
-				\centering
-				\includegraphics[width=0.99\textwidth]{fig1f.png}
-				\caption{}
-				\label{fig1f}
-			\end{subfigure}
-			
-			\begin{subfigure}{0.45\linewidth}
-				\centering
-				\includegraphics[width=0.99\textwidth]{fig1g.png}
-				\caption{}
-				\label{fig1g}
-			\end{subfigure}
-			\begin{subfigure}{0.45\linewidth}
-				\centering
-				\includegraphics[width=0.99\textwidth]{fig1h.png}
-				\caption{}
-				\label{fig1h}
-			\end{subfigure}
-			
-			\caption
-			{
-				8 different polygons considered in MAP{\textunderscore}DAC2 (blue -- polygons recieved recursively, red -- merging quadrilateral).
-				(a) $PM_{x}^{1}$
-				(b) $PM_{x}^{2}$
-				(c) $PM_{x}^{3}$
-				(d) $PM_{x}^{4}$
-				(e) $PM_{y}^{1}$
-				(f) $PM_{y}^{2}$
-				(g) $PM_{y}^{3}$
-				(h) $PM_{y}^{4}$
-			}
-			\label{fig1}
-		\end{figure}
+				\begin{subfigure}{0.45\linewidth}
+					\centering
+					\includegraphics[width=0.99\textwidth]{fig1a.png}
+					\caption{}
+					\label{fig1a}
+				\end{subfigure}
+				\begin{subfigure}{0.45\linewidth}
+					\centering
+					\includegraphics[width=0.99\textwidth]{fig1b.png}
+					\caption{}
+					\label{fig1b}
+				\end{subfigure}
+				
+				\begin{subfigure}{0.45\linewidth}
+					\centering
+					\includegraphics[width=0.99\textwidth]{fig1c.png}
+					\caption{}
+					\label{fig1c}
+				\end{subfigure}
+				\begin{subfigure}{0.45\linewidth}
+					\centering
+					\includegraphics[width=0.99\textwidth]{fig1d.png}
+					\caption{}
+					\label{fig1d}
+				\end{subfigure}
+				
+				\begin{subfigure}{0.45\linewidth}
+					\centering
+					\includegraphics[width=0.99\textwidth]{fig1e.png}
+					\caption{}
+					\label{fig1e}
+				\end{subfigure}
+				\begin{subfigure}{0.45\linewidth}
+					\centering
+					\includegraphics[width=0.99\textwidth]{fig1f.png}
+					\caption{}
+					\label{fig1f}
+				\end{subfigure}
+				
+				\begin{subfigure}{0.45\linewidth}
+					\centering
+					\includegraphics[width=0.99\textwidth]{fig1g.png}
+					\caption{}
+					\label{fig1g}
+				\end{subfigure}
+				\begin{subfigure}{0.45\linewidth}
+					\centering
+					\includegraphics[width=0.99\textwidth]{fig1h.png}
+					\caption{}
+					\label{fig1h}
+				\end{subfigure}
+				
+				\caption
+				{
+					8 different polygons considered in MAP{\textunderscore}DAC2 (blue -- polygons recieved recursively, red -- merging quadrilateral).
+					(a) $PM_{x}^{1}$
+					(b) $PM_{x}^{2}$
+					(c) $PM_{x}^{3}$
+					(d) $PM_{x}^{4}$
+					(e) $PM_{y}^{1}$
+					(f) $PM_{y}^{2}$
+					(g) $PM_{y}^{3}$
+					(h) $PM_{y}^{4}$
+				}
+				\label{fig1}
+			\end{figure}
 		
 		\subsection{Postprocessing of MAP solution}
 			It is typical for MAP approximation algorithms to use heuristics that greedily choose point, edge, quadrilateral, etc.
@@ -232,7 +232,39 @@
 			To check whether 4 a point is inside or outside of the polygon we can use the windmill algorithm.
 			To find edge $(P_{j-1}, P_{j})$ we can use visibility polygon computed when checking (**).
 			
-			In practice, we ran several trials of postprocessing until no more area minimizing points rearrangements are possible
+			In practice, we ran several trials of postprocessing until no more area minimizing points rearrangements are possible.
+			Example of postprocessing optimization is shown in Fig. \ref{fig2}.
+			
+			\begin{figure}[htbp]
+				\centering
+				\begin{subfigure}{0.32\linewidth}
+					\centering
+					\includegraphics[width=0.99\textwidth]{fig2a.png}
+					\caption{}
+					\label{fig2a}
+				\end{subfigure}
+				\begin{subfigure}{0.32\linewidth}
+					\centering
+					\includegraphics[width=0.99\textwidth]{fig2b.png}
+					\caption{}
+					\label{fig2b}
+				\end{subfigure}
+				\begin{subfigure}{0.32\linewidth}
+					\centering
+					\includegraphics[width=0.99\textwidth]{fig2c.png}
+					\caption{}
+					\label{fig2c}
+				\end{subfigure}
+				
+				\caption
+				{
+					Example of postprocessing (red point $P$ is postprocessed, yellow -- removed triangle, green -- added triangle).
+					(a) initial polygon
+					(b) $P$ removed from polygon
+					(c) $P$ inserted in better position
+				}
+				\label{fig2}
+			\end{figure}
 	
 	\section {Complexity and Correctness}
 	\label{S3}
@@ -304,7 +336,13 @@
 				}
 				\label{fig3}
 			\end{figure}
-	
+
+			\begin{figure*}[htbp]
+				\centerline{\includegraphics[width=0.9\textwidth]{fig4.png}}
+				\caption{The interface of the developed program.}
+				\label{fig4}
+			\end{figure*}
+
 			\textbf{Theorem 3.}
 			The postprocessing algorithm never throws removed points into the trap region of $P^{*}$.
 			The postprocessing algorithm either improves the area of the given polygon or does not change it.
@@ -323,18 +361,12 @@
 			If both (+) and (+++) are not met then from (+) we have guarantee of (**).
 			That is, edge $(P_{i-1}, P_{i+1})$ of $P^{*}$ is visible from $(P_{i}$.
 			So, removed point $P_{i}$ is not in the trap region but overall area remains the same as before (case (++)).
-	
+			
 	\section{Experimental Results}
 	\label{S4}
 		To test described algorithms and compare them with previously proposed algorithms we have implemented MAP{\textunderscore}DAC2, MAP{\textunderscore}DAC, MAP{\textunderscore}Greedy, MAP{\textunderscore}RAND, MAP{\textunderscore}RS, and postprocessing.
 		We write in C++ using the SFML library for a graphical interface (Fig. \ref{fig4}).
 		There are 2 ways of specifying the data – reading points from the file and adding or deleting points via clicking on the drawing panel.
-		
-		\begin{figure*}[htbp]
-			\centerline{\includegraphics[width=0.9\textwidth]{fig4.png}}
-			\caption{The interface of the developed program.}
-			\label{fig4}
-		\end{figure*}
 		
 		To compare different algorithms 30 random point sets are generated.
 		There are 3 types of point sets, each type consist of 10 sets of different sizes.
@@ -382,42 +414,42 @@
 		
 		\begin{figure}[htbp]
 			\centering
-			\begin{subfigure}{0.99\linewidth}
+			\begin{subfigure}{0.85\linewidth}
 				\centering
 				\includegraphics[width=0.99\textwidth]{fig6a.png}
 				\caption{}
 				\label{fig6a}
 			\end{subfigure}
 			
-			\begin{subfigure}{0.99\linewidth}
+			\begin{subfigure}{0.85\linewidth}
 				\centering
 				\includegraphics[width=0.99\textwidth]{fig6b.png}
 				\caption{}
 				\label{fig6b}
 			\end{subfigure}
 			
-			\begin{subfigure}{0.99\linewidth}
+			\begin{subfigure}{0.85\linewidth}
 				\centering
 				\includegraphics[width=0.99\textwidth]{fig6c.png}
 				\caption{}
 				\label{fig6c}
 			\end{subfigure}
 			
-			\begin{subfigure}{0.99\linewidth}
+			\begin{subfigure}{0.85\linewidth}
 				\centering
 				\includegraphics[width=0.99\textwidth]{fig6d.png}
 				\caption{}
 				\label{fig6d}
 			\end{subfigure}
 			
-			\begin{subfigure}{0.99\linewidth}
+			\begin{subfigure}{0.85\linewidth}
 				\centering
 				\includegraphics[width=0.99\textwidth]{fig6e.png}
 				\caption{}
 				\label{fig6e}
 			\end{subfigure}
 			
-			\begin{subfigure}{0.99\linewidth}
+			\begin{subfigure}{0.85\linewidth}
 				\centering
 				\includegraphics[width=0.99\textwidth]{fig6f.png}
 				\caption{}
@@ -490,7 +522,7 @@
 		\end{table*}
 	
 		We also ran postprocessing on output from all algorithms on all point sets (Fig. \ref{fig6} (f)).
-		Table \ref{table2} shows areas of polygons after postprocessing in percentages relative to the area before postprocessing.
+%		Table \ref{table2} shows areas of polygons after postprocessing in percentages relative to the area before postprocessing.
 		We emphasize that postprocessing allows decreasing the area of solutions up to 10-25\%.
 		Table \ref{table3} shows results after postprocessing.
 		The result is improved by 18.7\% on average.
@@ -498,9 +530,10 @@
 		We apply postprocessing only to the best output of MAP{\textunderscore}RS and MAP{\textunderscore}RAND.
 		It is expected to get even better results if postprocessing is applied after every trial of randomized algorithms.
 		
+\iffalse
 		\begin{table*}[htbp]
 			\begin{center}
-				\caption{Area of polygons after postprocessing relative to Table 1.}
+				\caption{Area of polygons after postprocessing relative to Table 1 (\%).}
 				\begin{tabular}{|c|c|c|c|c|c|}
 					\hline
 					File name & MAP{\textunderscore}DAC2{\textunderscore}P & MAP{\textunderscore}DAC{\textunderscore}P & MAP{\textunderscore}Greedy{\textunderscore}P & MAP{\textunderscore}RAND{\textunderscore}P & MAP{\textunderscore}RS{\textunderscore}P \\
@@ -549,6 +582,7 @@
 				\label{table2}
 			\end{center}
 		\end{table*}
+\fi
 		
 		\begin{table*}[htbp]
 			\begin{center}
@@ -621,7 +655,7 @@
 		Polygon combining is left for future research.
 		We believe that all 3 tactics deserve further investigation.
 	
-	%\clearpage
+%	\clearpage
 	
 	\begin{thebibliography}{00}
 		\bibitem{link1} Worboys, M., \& Duckham, M. (2006). Monitoring qualitative spatiotemporal change for geosensor networks. International Journal of Geographical Information Science, 20(10), 1087–1108.
