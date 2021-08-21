@@ -131,9 +131,86 @@
 			\end {enumerate}
 			
 			All steps of MAP{\textunderscore}DAC2 except 4 and 8 are straightforward.
-			Step 4 is described in the original paper for MAP{\textunderscore}DAC \cite{link13}.
+			Step 4 is described in the original paper for MAP{\textunderscore}DAC \cite{link13} and can be done in the next way.
+			\begin{enumerate}
+				\item Build polygon $E$ enclosing area between polygons $A$ and $B$.
+				It consists of 2 chains, 1 from each of given polygons, and 2 tangents that connect border points of chains;
+				\item For all points of the first chain find all visible points on the second chain \cite{link14};
+				\item For all consecutive point pairs of the first chain find all visible consecutive point pairs on the second chain that form simple quadrilateral.
+				Choose the smallest quadrilateral. 
+			\end {enumerate}
 			Step 8 is almost the same as 4, but with horizontal separation.
 			In case implementation is hardcoded for vertical separation, it is possible to interchange X and Y coordinates of points to bring step 8 to 4.
+			8 polygons considered on steps 4 and 8 are shown in Fig. \ref{fig1}.
+			
+			\begin{figure}[htbp]
+			\centering
+			\begin{subfigure}{0.45\linewidth}
+				\centering
+				\includegraphics[width=0.99\textwidth]{fig1a.png}
+				\caption{}
+				\label{fig1a}
+			\end{subfigure}
+			\begin{subfigure}{0.45\linewidth}
+				\centering
+				\includegraphics[width=0.99\textwidth]{fig1b.png}
+				\caption{}
+				\label{fig1b}
+			\end{subfigure}
+			
+			\begin{subfigure}{0.45\linewidth}
+				\centering
+				\includegraphics[width=0.99\textwidth]{fig1c.png}
+				\caption{}
+				\label{fig1c}
+			\end{subfigure}
+			\begin{subfigure}{0.45\linewidth}
+				\centering
+				\includegraphics[width=0.99\textwidth]{fig1d.png}
+				\caption{}
+				\label{fig1d}
+			\end{subfigure}
+			
+			\begin{subfigure}{0.45\linewidth}
+				\centering
+				\includegraphics[width=0.99\textwidth]{fig1e.png}
+				\caption{}
+				\label{fig1e}
+			\end{subfigure}
+			\begin{subfigure}{0.45\linewidth}
+				\centering
+				\includegraphics[width=0.99\textwidth]{fig1f.png}
+				\caption{}
+				\label{fig1f}
+			\end{subfigure}
+			
+			\begin{subfigure}{0.45\linewidth}
+				\centering
+				\includegraphics[width=0.99\textwidth]{fig1g.png}
+				\caption{}
+				\label{fig1g}
+			\end{subfigure}
+			\begin{subfigure}{0.45\linewidth}
+				\centering
+				\includegraphics[width=0.99\textwidth]{fig1h.png}
+				\caption{}
+				\label{fig1h}
+			\end{subfigure}
+			
+			\caption
+			{
+				8 different polygons considered in MAP{\textunderscore}DAC2 (blue -- polygons recieved recursively, red -- merging quadrilateral).
+				(a) $PM_{x}^{1}$
+				(b) $PM_{x}^{2}$
+				(c) $PM_{x}^{3}$
+				(d) $PM_{x}^{4}$
+				(e) $PM_{y}^{1}$
+				(f) $PM_{y}^{2}$
+				(g) $PM_{y}^{3}$
+				(h) $PM_{y}^{4}$
+			}
+			\label{fig1}
+		\end{figure}
 		
 		\subsection{Postprocessing of MAP solution}
 			It is typical for MAP approximation algorithms to use heuristics that greedily choose point, edge, quadrilateral, etc.

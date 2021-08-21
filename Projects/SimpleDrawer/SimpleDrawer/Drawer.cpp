@@ -1,6 +1,6 @@
 #include "Drawer.h"
 
-Drawer::Drawer() : windowX(1100), windowY(800), windowShift(50), pointR(4.0)
+Drawer::Drawer() : windowX(1320), windowY(960), windowShift(50), pointR(4.0)
 {
 	timer = 0;
 }

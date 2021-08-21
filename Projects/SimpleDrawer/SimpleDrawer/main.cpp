@@ -63,7 +63,7 @@ int main()
 	//*/
 
 	//*
-	string name = "0";
+	string name = "7";
 	drawer.readTriangles("Data/Fig1/trigA" + name + ".txt", sf::Color::Green, sf::Color::Cyan);
 	drawer.readTriangles("Data/Fig1/trigB" + name + ".txt", sf::Color::Green, sf::Color::Cyan);
 	drawer.readTriangles("Data/Fig1/trigQ" + name + ".txt", sf::Color::Green, sf::Color::Red);
